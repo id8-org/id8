@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Toaster } from './components/ui/toaster';
@@ -10,7 +10,6 @@ import { useNavigate } from 'react-router-dom';
 import Kanban from './pages/Kanban';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
-import { useState } from 'react';
 import AskAIWindow from './components/ui/AskAIWindow';
 import { AddIdeaModal } from './components/AddIdeaModal';
 import { ErrorFallback } from './components/ui/error-fallback';
@@ -55,6 +54,14 @@ const queryClient = new QueryClient({
 function AppContent() {
   const { user, isLoading } = useAuth();
   const [addIdeaModalOpen, setAddIdeaModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user && user.onboarding_required) {
+      navigate('/onboarding');
+    }
+  }, [user, navigate]);
+
   if (isLoading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }

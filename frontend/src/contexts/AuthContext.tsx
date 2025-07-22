@@ -15,6 +15,7 @@ interface User {
   profile?: UserProfile;
   account_type: string;
   tier: string;
+  onboarding_required?: boolean;
 }
 
 interface UserProfile {

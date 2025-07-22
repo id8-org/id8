@@ -169,20 +169,25 @@ async def google_auth_with_code(auth_request: GoogleCodeRequest, db: Session = D
         )
 
 @router.get("/me", response_model=User)
-async def get_current_user_info(current_user: UserModel = Depends(get_current_active_user)):
-    """Get current user information"""
-    # Build config from tier and account type
+async def get_current_user_info(
+    current_user: UserModel = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
     tier_config = get_tier_config(str(current_user.tier))
     account_type_config = get_account_type_config(str(current_user.account_type))
     config = {**tier_config, **account_type_config}
-    # Return user with tier, account_type, and config
     user_dict = current_user.__dict__.copy()
     user_dict["tier"] = current_user.tier
     user_dict["account_type"] = current_user.account_type
     user_dict["config"] = config
+
     # Attach profile if present
-    if hasattr(current_user, "profile") and current_user.profile:
-        user_dict["profile"] = current_user.profile
+    profile = db.query(UserProfileModel).filter(UserProfileModel.user_id == current_user.id).first()
+    user_dict["profile"] = profile
+
+    # Add onboarding_required field
+    user_dict["onboarding_required"] = not profile or not is_profile_complete(profile)
+
     return user_dict
 
 @router.get("/profile", response_model=UserProfileResponse)
@@ -360,7 +365,7 @@ async def onboarding_step5(
     db: Session = Depends(get_db)
 ):
     """Complete onboarding step 5: Preferences"""
-    profile = db.query(UserProfileModel).filter(UserProfileModel.user_id == str(current_user.id)).first()
+    profile = db.query(UserProfileModel).filter(UserProfileModel.user_id == current_user.id).first()
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
     setattr(profile, 'preferred_business_models', data.preferred_business_models)
@@ -443,6 +448,19 @@ async def onboarding_complete(
     db.refresh(current_user)
     return {"status": "success", "user": current_user}
 
+
+def is_profile_complete(profile) -> bool:
+    required_fields = [
+        'first_name', 'last_name', 'location', 'skills', 'interests',
+        'preferred_business_models', 'risk_tolerance', 'time_availability'
+    ]
+    for field in required_fields:
+        value = getattr(profile, field, None)
+        if value is None or (isinstance(value, list) and not value) or (isinstance(value, str) and not value.strip()):
+            return False
+    return True
+
+
 @router.post("/invite/accept")
 async def accept_invite(
     invite_id: str = Query(...),
@@ -450,6 +468,12 @@ async def accept_invite(
     current_user: UserModel = Depends(get_current_active_user)
 ):
     """Accept a team invite (by invite id)."""
+    profile = db.query(UserProfileModel).filter(UserProfileModel.user_id == current_user.id).first()
+    if not profile or not is_profile_complete(profile):
+        raise HTTPException(
+            status_code=403,
+            detail="Please complete your onboarding profile before accessing this feature"
+        )
     invite = db.query(Invite).filter(Invite.id == invite_id, Invite.revoked == False, Invite.accepted == False).first()
     if not invite:
         raise HTTPException(status_code=404, detail="Invite not found or already used/revoked.")
@@ -672,4 +696,4 @@ async def remove_github_account(current_user: UserModel = Depends(get_current_ac
             return {"success": False, "message": "No GitHub account linked."}
     except Exception as e:
         logger.error(f"Error removing GitHub account: {e}")
-        return JSONResponse(status_code=500, content={"success": False, "error": str(e)}) 
+        return JSONResponse(status_code=500, content={"success": False, "error": str(e)})

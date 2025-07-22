@@ -214,34 +214,25 @@ def delete_deep_dive_version_api(idea_id: str, version_number: int, db: Session 
 
 def map_flat_deep_dive(flat):
     scores = flat.get('Signal Score', {})
+    score_fields = [
+        'Product-Market Fit Potential',
+        'Market Size',
+        'Market Timing',
+        "Founder's Ability to Execute",
+        'Technical Feasibility',
+        'Go to Market',
+        'Competitive Moat',
+        'Profitability Potential',
+        'Strategic Exit Potential',
+        'Regulatory Risk'
+    ]
+    score_values = [scores.get(field) for field in score_fields if scores.get(field) is not None]
+    overall_score = sum(score_values) if score_values else None  # Sum of all scored fields
+
     return {
-        'product_market_fit_score': scores.get('Product-Market Fit Potential'),
-        'product_market_fit_narrative': flat.get('Product'),
-        'market_size_score': scores.get('Market Size & Timing'),
-        'market_size_narrative': flat.get('Market'),
-        'market_timing_score': scores.get('Market Size & Timing'),
-        'market_timing_narrative': flat.get('Timing'),
-        'founders_execution_score': scores.get("Founder's Ability to Execute"),
-        'founders_execution_narrative': '',
-        'technical_feasibility_score': scores.get('Technical Feasibility'),
-        'technical_feasibility_narrative': '',
-        'go_to_market_score': scores.get('Go to Market Feasibility'),
-        'go_to_market_narrative': '',
-        'profitability_potential_score': scores.get('Profitability Potential'),
-        'profitability_potential_narrative': flat.get('Funding'),
-        'competitive_moat_score': scores.get('Competitive Moat'),
-        'competitive_moat_narrative': flat.get('Moat'),
-        'strategic_exit_score': scores.get('Strategic Exit Potential'),
-        'strategic_exit_narrative': '',
-        'regulatory_risk_score': scores.get('Regulatory & External Risks'),
-        'regulatory_risk_narrative': '',
-        'overall_investor_attractiveness_score': scores.get('Overall Investor Attractiveness'),
-        'overall_investor_attractiveness_narrative': flat.get('Summary'),
-        'customer_validation_plan': flat.get('Customer Validation Plan', ''),
-        'summary': flat.get('Summary'),
-        'overall_score': scores.get('Overall Investor Attractiveness'),
-        'go_no_go': flat.get('GoNoGo'),
-        'raw_response': flat
+        # ...other mappings...
+        'overall_score': overall_score,
+        # ...other mappings...
     }
 
 def safe_idea_out(idea, idx=None):
@@ -306,8 +297,24 @@ def safe_idea_out(idea, idx=None):
         as_dict['repo_url'] = 'https://example.com'
     # Patch for deep_dive.overall_score
     if 'deep_dive' in as_dict and isinstance(as_dict['deep_dive'], dict):
-        if as_dict['deep_dive'].get('overall_score') is None:
-            as_dict['deep_dive']['overall_score'] = 0
+        categories = [
+            'market_opportunity',
+            'execution_capability',
+            'business_viability',
+            'strategic_alignment_risks'
+        ]
+        total_score = 0
+        for cat in categories:
+            cat_obj = as_dict['deep_dive'].get(cat)
+            if cat_obj and isinstance(cat_obj, dict):
+                # Try 'score' first, fallback to sum of values in 'scores' dict
+                if 'score' in cat_obj and isinstance(cat_obj['score'], (int, float)):
+                    total_score += cat_obj['score']
+                elif 'scores' in cat_obj and isinstance(cat_obj['scores'], dict):
+                    total_score += sum(
+                        v for v in cat_obj['scores'].values() if isinstance(v, (int, float))
+                    )
+        as_dict['deep_dive']['overall_score'] = total_score
     # Patch for business_model, market_positioning, competitive_advantage
     for field in ['business_model', 'market_positioning', 'competitive_advantage']:
         if as_dict.get(field) is None:

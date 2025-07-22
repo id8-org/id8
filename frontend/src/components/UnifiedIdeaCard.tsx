@@ -2,14 +2,31 @@ import React, { useState } from "react";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Idea, Stage } from "@/types/idea";
-import DeepDiveView from './DeepDiveView';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { GlobalActionsDropdown } from "./GlobalActionsDropDown";
 
 export interface UnifiedIdeaCardProps {
   idea: Idea;
   onClick?: () => void;
   className?: string;
 }
+
+export interface DeepDiveStage {
+  overall_score?: number;
+  market_opportunity?: {
+    scores?: { product_market_fit?: number };
+  };
+  execution_capability?: {
+    scores?: { technical_feasibility?: number };
+  };
+  business_viability?: {
+    scores?: { profitability_potential?: number };
+  };
+  strategic_alignment_risks?: {
+    scores?: { regulatory_and_external_risks?: number };
+  };
+}
+
 
 const getSourceTypeLabel = (type?: string | null) => {
   switch (type) {
@@ -64,6 +81,8 @@ const mapStatusToStage = (status: string): Stage => {
       return 'suggested';
   }
 };
+
+const cleanText = (text: string) => text.replace(/\.\.\.$/, '');
 
 const UnifiedIdeaCard: React.FC<UnifiedIdeaCardProps> = ({
   idea,
@@ -122,12 +141,22 @@ const UnifiedIdeaCard: React.FC<UnifiedIdeaCardProps> = ({
       >
         {/* Header - Always visible */}
         <div className="flex items-center justify-between mb-0 mt-0 pt-0">
-          <div className="font-bold text-base text-blue-900 leading-tight line-clamp-2 hover:underline max-h-[2.5em]">
-            {idea.hook ? `${idea.title}: ${idea.hook}` : idea.title}
+        <div className="font-bold text-base text-blue-900 leading-tight line-clamp-2 hover:underline mt-2 max-w-[220px]">
+            {idea.hook
+              ? `${cleanText(idea.title)}: ${cleanText(idea.hook)}`
+              : cleanText(idea.title)}
           </div>
           {idea.idea_number && (
             <span className="bg-yellow-100 text-yellow-800 rounded-full px-1.5 py-0.5 text-xs font-bold ml-2">#{idea.idea_number}</span>
           )}
+        </div>
+
+        {/* Global Actions Dropdown */}
+        <div className="absolute top-2 right-2 z-10">
+          <GlobalActionsDropdown onAction={(key) => {
+            // handle action here (e.g., open edit modal, export, etc.)
+            console.log("Action:", key);
+          }} />
         </div>
 
         {/* Stage badge - Always visible */}
@@ -163,7 +192,11 @@ const UnifiedIdeaCard: React.FC<UnifiedIdeaCardProps> = ({
         {currentStage === 'deep-dive' && (
           idea.deep_dive && Object.keys(idea.deep_dive).length > 0 ? (
             <div className="mt-2">
-              <div className="text-xs font-semibold text-slate-700 mb-1">Deep Dive Score: <span className="text-blue-800">{idea.deep_dive['overall_score'] ?? '—'}/100</span></div>
+              {idea.deep_dive?.overall_score !== undefined && (
+                <div className="text-xs font-semibold text-blue-700 mt-1 mb-1">
+                  Deep Dive Score: <span className="text-blue-900">{idea.deep_dive.overall_score}/100</span>
+                </div>
+              )}
               <div className="flex flex-wrap gap-2">
                 {idea.deep_dive['market_opportunity']?.scores && (
                   <span className="bg-blue-50 text-blue-700 rounded px-1.5 py-0.5 text-[10px] font-medium">Market: {idea.deep_dive['market_opportunity'].scores.product_market_fit ?? '—'}</span>
@@ -206,4 +239,4 @@ const UnifiedIdeaCard: React.FC<UnifiedIdeaCardProps> = ({
   );
 };
 
-export default UnifiedIdeaCard; 
+export default UnifiedIdeaCard;

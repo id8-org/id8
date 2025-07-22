@@ -12,8 +12,8 @@ import { getLongTitle, getDeepDiveSectionScores, getTitleAndHookTitle } from '@/
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 import { toast } from '@/components/ui/use-toast';
 import { updateIdeaStatus } from '@/lib/api';
-// Remove: import DeepDiveView from './DeepDiveView';
-// Remove: import { normalizeDeepDive } from '@/pages/IdeaCards'; // or the correct import path
+import { GlobalActionsDropdown } from "./GlobalActionsDropDown";
+
 
 interface UnifiedIdeaModalProps {
   idea: Idea | null;
@@ -69,19 +69,21 @@ const UnifiedIdeaModal: React.FC<UnifiedIdeaModalProps> = ({
   const showSuggestedTab = normalizedIdea.status !== 'deep_dive';
 
   // Helper functions
-  const getScoreColor = (score: number) => {
+  const getScoreColor = (score: number): string => {
     if (score >= 8) return 'text-score-high';
     if (score >= 6) return 'text-score-medium';
     return 'text-score-low';
   };
 
-  const getScoreBadgeVariant = (score: number) => {
+  const getScoreBadgeVariant = (
+    score: number
+  ): 'default' | 'secondary' | 'destructive' | 'outline' => {
     if (score >= 8) return 'default';
     if (score >= 6) return 'secondary';
     return 'destructive';
   };
 
-  const getStageColor = (stageKey: Stage) => {
+  const getStageColor = (stageKey: Stage): string => {
     switch (stageKey) {
       case 'suggested': return 'purple-500';
       case 'deep-dive': return 'blue-500';
@@ -161,7 +163,7 @@ const UnifiedIdeaModal: React.FC<UnifiedIdeaModalProps> = ({
         <CardContent className="p-3">
           <div className="text-center">
             <div className="font-semibold text-sm text-slate-700 mb-1">{title}</div>
-            <Badge variant="outline" className="text-xs">
+            <Badge data-variant={getScoreBadgeVariant(score)} className="text-xs">
               {score}/{maxScore}
             </Badge>
           </div>
@@ -202,7 +204,7 @@ const UnifiedIdeaModal: React.FC<UnifiedIdeaModalProps> = ({
                 <div className="flex items-center gap-2 mb-2">
                   <span className="font-semibold text-slate-700 text-xs">{detail.label}:</span>
                   {detail.score !== null && (
-                    <Badge variant="outline" className="text-xs">{detail.score}/10</Badge>
+                    <Badge data-variant={getScoreBadgeVariant(detail.score)} className="text-xs">{detail.score}/10</Badge>
                   )}
                 </div>
                 <div className="text-slate-600 text-xs leading-relaxed">{detail.narrative || '—'}</div>
@@ -255,7 +257,7 @@ const UnifiedIdeaModal: React.FC<UnifiedIdeaModalProps> = ({
       <div className="flex-1">
         <div className="text-center mb-2">
           <div className="font-semibold text-sm text-slate-700">{title}</div>
-          <Badge variant="outline" className="text-xs">{score}/{maxScore}</Badge>
+          <Badge data-variant={getScoreBadgeVariant(score)} className="text-xs">{score}/{maxScore}</Badge>
         </div>
         <div className="text-xs text-slate-600 text-center">
           {details.map((detail, index) => (
@@ -290,7 +292,7 @@ const UnifiedIdeaModal: React.FC<UnifiedIdeaModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[1200px] w-[98vw] min-h-[60vh] max-h-[90vh] mx-auto overflow-y-auto p-0 rounded-2xl bg-white shadow-xl z-50 text-[15px]" style={{ minHeight: '600px', maxHeight: '90vh', fontSize: '15px' }}>
         <DialogTitle>
-          <div className="sr-only">Idea Details</div>
+          <div className="mt-2"></div>
         </DialogTitle>
         
         <div className="flex flex-col h-full w-full" style={{ minHeight: '600px', maxHeight: '90vh', fontSize: '15px' }}>
@@ -298,7 +300,7 @@ const UnifiedIdeaModal: React.FC<UnifiedIdeaModalProps> = ({
           <DialogHeader className="p-4 pt-0 pb-0 flex-shrink-0">
             <div className="flex items-start justify-between w-full mb-0">
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-lg text-blue-900 leading-tight mb-0 line-clamp-2">
+                <div className="font-bold text-lg text-blue-900 leading-tight mb-0 line-clamp-2 mt-4">
                   {getTitleAndHookTitle(normalizedIdea)}
                 </div>
                 <div className="flex flex-wrap gap-2 items-center mt-1 mb-1">
@@ -344,8 +346,7 @@ const UnifiedIdeaModal: React.FC<UnifiedIdeaModalProps> = ({
                     <button className="px-1.5 py-0.5 text-xs font-medium rounded bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition">Edit</button>
                     {normalizedIdea.status === 'suggested' && (
                       <Button
-                        variant="default"
-                        size="sm"
+                        data-variant="default"
                         className="ml-1"
                         onClick={() => handleRequestDeepDive(normalizedIdea.id)}
                         disabled={deepDiveLoading}
@@ -356,8 +357,7 @@ const UnifiedIdeaModal: React.FC<UnifiedIdeaModalProps> = ({
                     {/* Add Iterate button for deep dive stage */}
                     {normalizedIdea.status === 'deep_dive' && setIterationIdea && setShowIterationStepper && (
                       <Button
-                        variant="default"
-                        size="sm"
+                        data-variant="default"
                         className="ml-1"
                         onClick={() => {
                           setIterationIdea(normalizedIdea);
@@ -370,6 +370,12 @@ const UnifiedIdeaModal: React.FC<UnifiedIdeaModalProps> = ({
                     )}
                   </div>
                 </div>
+              </div>
+              <div className="absolute top-2 right-12 z-10">
+                <GlobalActionsDropdown onAction={(key) => {
+                  // handle action here (e.g., open edit modal, export, etc.)
+                  console.log("Action:", key);
+                }} />
               </div>
               <DialogClose />
             </div>
@@ -656,4 +662,4 @@ const UnifiedIdeaModal: React.FC<UnifiedIdeaModalProps> = ({
   );
 };
 
-export default UnifiedIdeaModal; 
+export default UnifiedIdeaModal;
