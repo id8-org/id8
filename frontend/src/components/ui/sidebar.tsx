@@ -183,7 +183,7 @@ const Sidebar = React.forwardRef<
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
-            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+            className="sidebar-mobile-overlay w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
             style={{
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
             } as React.CSSProperties}
@@ -200,17 +200,17 @@ const Sidebar = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          `h-full flex flex-col bg-sidebar text-sidebar-foreground border-r border-slate-200 transition-all duration-300 ease-in-out`,
-          open ? 'w-[12rem] min-w-[12rem] max-w-[12rem]' : 'w-[3rem] min-w-[3rem] max-w-[3rem]'
+          `sidebar-accordion sidebar-container h-full flex flex-col bg-sidebar text-sidebar-foreground border-r border-slate-200`,
+          state === "expanded" ? 'w-[12rem] min-w-[12rem] max-w-[12rem]' : 'w-[3rem] min-w-[3rem] max-w-[3rem]'
         )}
-        data-state={open ? 'expanded' : 'collapsed'}
+        data-state={state}
         {...props}
       >
         {/* Collapse/Expand button at the top */}
         <div className="flex items-center justify-end p-2">
           <SidebarTrigger />
         </div>
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col sidebar-content">
           {children}
         </div>
       </div>
@@ -231,7 +231,7 @@ const SidebarTrigger = React.forwardRef<
       data-sidebar="trigger"
       variant="ghost"
       size="icon"
-      className={cn("h-7 w-7", className)}
+      className={cn("sidebar-trigger h-7 w-7", className)}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
@@ -527,17 +527,22 @@ const SidebarMenuButton = React.forwardRef<
         data-sidebar="menu-button"
         data-size={size}
         data-active={isActive}
-        className={cn(sidebarMenuButtonVariants({ variant, size }), className, "flex items-center justify-start gap-3")}
+        className={cn(sidebarMenuButtonVariants({ variant, size }), className, "sidebar-item flex items-center justify-start gap-3")}
         {...props}
       >
         <span className="flex items-center justify-center w-6 h-6">{icon}</span>
         <span
-          className={
+          className={cn(
+            "transition-all duration-200 ease-out",
             state === "collapsed"
-              ? "opacity-0 w-0 overflow-hidden transition-all duration-200"
-              : "opacity-100 w-auto transition-all duration-200"
-          }
-          style={{ minWidth: state === "collapsed" ? 0 : '1.5rem', display: 'inline-block' }}
+              ? "opacity-0 w-0 overflow-hidden"
+              : "opacity-100 w-auto"
+          )}
+          style={{ 
+            minWidth: state === "collapsed" ? 0 : '1.5rem', 
+            display: 'inline-block',
+            transform: state === "collapsed" ? 'translateX(-8px)' : 'translateX(0)'
+          }}
         >
           {label}
         </span>

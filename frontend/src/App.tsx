@@ -56,30 +56,6 @@ function AppContent() {
   const [addIdeaModalOpen, setAddIdeaModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  // TEMP: Bypass auth for layout testing
-  const testMode = true;
-  
-  if (testMode) {
-    return (
-      <>
-        <Layout title="Test Layout" onAddIdea={() => setAddIdeaModalOpen(true)}>
-          <div className="p-8">
-            <h1 className="text-2xl font-bold mb-4">Test Content</h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Array.from({ length: 9 }).map((_, i) => (
-                <div key={i} className="bg-white p-4 rounded-lg shadow">
-                  <h3>Card {i + 1}</h3>
-                  <p>This is test content to demonstrate the layout behavior.</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Layout>
-        <AddIdeaModal isOpen={addIdeaModalOpen} onClose={() => setAddIdeaModalOpen(false)} onIdeaCreated={() => setAddIdeaModalOpen(false)} />
-      </>
-    );
-  }
-
   useEffect(() => {
     if (user && user.onboarding_required) {
       navigate('/onboarding');
