@@ -280,57 +280,66 @@ export const AddIdeaModal = ({ isOpen, onClose, onIdeaCreated, refreshIdeas }: A
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-4xl h-full flex flex-col">
-        <DialogHeader className="flex-none">
-          <DialogTitle className="text-2xl font-bold">Add Idea</DialogTitle>
-          <DialogDescription>
-            Add a new idea to your workspace.
+      <DialogContent className="w-full max-w-5xl h-full flex flex-col">
+        <DialogHeader className="flex-none px-8 pt-8 pb-4">
+          <DialogTitle className="text-3xl font-bold text-gray-900">Add Idea</DialogTitle>
+          <DialogDescription className="text-lg text-gray-600 mt-2">
+            Add a new idea to your workspace and validate it.
           </DialogDescription>
         </DialogHeader>
-        <div id="add-idea-desc" style={{display: 'none'}}>Add a new idea to your workspace.</div>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col">
-          <TabsList className="grid w-full grid-cols-2 mb-6 h-12 bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
-            <TabsTrigger value="ai-suggested" className={`text-sm h-12 px-4 font-semibold transition-all ${activeTab === 'ai-suggested' ? 'bg-primary/10 text-primary border-b-2 border-primary' : 'text-gray-700'}`}> 
-              <Sparkles className="mr-2 h-4 w-4" /> AI-Suggested
+        <div id="add-idea-desc" style={{display: 'none'}}>Add a new idea to your workspace and validate it.</div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col px-8 pb-8">
+          <TabsList className="grid w-full grid-cols-2 mb-8 h-14 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200">
+            <TabsTrigger value="ai-suggested" className={`text-base h-12 px-6 font-semibold transition-all duration-200 rounded-lg ${activeTab === 'ai-suggested' ? 'bg-white text-primary shadow-md border border-primary/20' : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'}`}> 
+              <Sparkles className="mr-3 h-5 w-5" /> AI-Suggested Ideas
             </TabsTrigger>
-            <TabsTrigger value="bring-your-own" className={`text-sm h-12 px-4 font-semibold transition-all ${activeTab === 'bring-your-own' ? 'bg-primary/10 text-primary border-b-2 border-primary' : 'text-gray-700'}`}> 
-              <Target className="mr-2 h-4 w-4" /> Bring Your Own
+            <TabsTrigger value="bring-your-own" className={`text-base h-12 px-6 font-semibold transition-all duration-200 rounded-lg ${activeTab === 'bring-your-own' ? 'bg-white text-primary shadow-md border border-primary/20' : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'}`}> 
+              <Target className="mr-3 h-5 w-5" /> Bring Your Own Idea
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="ai-suggested" className="pt-1 min-h-[400px] flex flex-col justify-between">
-            <div className="space-y-6 flex-1">
-              <div className="flex items-center space-x-2">
+          <TabsContent value="ai-suggested" className="pt-0 min-h-[500px] flex flex-col justify-between">
+            <div className="space-y-8 flex-1">
+              <div className="flex items-center space-x-3 p-4 bg-primary/5 rounded-lg border border-primary/20">
                 <Checkbox
                   id="personalization-toggle"
                   checked={usePersonalization}
                   onCheckedChange={(checked) => setUsePersonalization(checked === true)}
                   className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  disabled={!hasCompletedOnboarding}
                 />
-                <Label htmlFor="personalization-toggle" className="text-sm font-medium text-gray-700">
-                  Use my profile to personalize ideas
-                </Label>
+                <div>
+                  <Label htmlFor="personalization-toggle" className="text-base font-medium text-gray-800 cursor-pointer">
+                    Use my profile to personalize ideas
+                  </Label>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {hasCompletedOnboarding 
+                      ? "Generate ideas tailored to your skills and preferences" 
+                      : "Complete your profile to enable personalized suggestions"
+                    }
+                  </p>
+                </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-6 rounded-lg border border-gray-200">
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Industry</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 p-8 rounded-xl border border-gray-200">
+                <div className="space-y-3">
+                  <Label className="text-base font-semibold text-gray-800">Industry Focus</Label>
                   <Select value={industry || 'any'} onValueChange={v => setIndustry(v === 'any' ? '' : v)}>
-                    <SelectTrigger className="h-11 text-sm bg-white">
-                      {industry || 'Any'}
+                    <SelectTrigger className="h-12 text-base bg-white border-2 hover:border-primary/30 transition-colors">
+                      {industry || 'Any Industry'}
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="any">Any</SelectItem>
+                      <SelectItem value="any">Any Industry</SelectItem>
                       {INDUSTRIES.map(ind => <SelectItem key={ind} value={ind}>{ind}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Business Vertical</Label>
+                <div className="space-y-3">
+                  <Label className="text-base font-semibold text-gray-800">Business Vertical</Label>
                   <Select value={vertical} onValueChange={setVertical}>
-                    <SelectTrigger className="h-11 text-sm bg-white">
-                      {vertical || "Select vertical"}
+                    <SelectTrigger className="h-12 text-base bg-white border-2 hover:border-primary/30 transition-colors">
+                      {vertical || "Choose a vertical market"}
                     </SelectTrigger>
                     <SelectContent>
                       {BUSINESS_VERTICAL_GROUPS.map(group => (
@@ -345,11 +354,11 @@ export const AddIdeaModal = ({ isOpen, onClose, onIdeaCreated, refreshIdeas }: A
                   </Select>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Business Horizontal</Label>
+                <div className="space-y-3">
+                  <Label className="text-base font-semibold text-gray-800">Business Horizontal</Label>
                   <Select value={horizontal} onValueChange={setHorizontal}>
-                    <SelectTrigger className="h-11 text-sm bg-white">
-                      {horizontal || "Select horizontal"}
+                    <SelectTrigger className="h-12 text-base bg-white border-2 hover:border-primary/30 transition-colors">
+                      {horizontal || "Select horizontal approach"}
                     </SelectTrigger>
                     <SelectContent>
                       {BUSINESS_HORIZONTAL_GROUPS.map(group => (
@@ -364,11 +373,11 @@ export const AddIdeaModal = ({ isOpen, onClose, onIdeaCreated, refreshIdeas }: A
                   </Select>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Business Model</Label>
+                <div className="space-y-3">
+                  <Label className="text-base font-semibold text-gray-800">Business Model</Label>
                   <Select value={businessModel} onValueChange={setBusinessModel}>
-                    <SelectTrigger className="h-11 text-sm bg-white">
-                      {businessModel || "Select business model"}
+                    <SelectTrigger className="h-12 text-base bg-white border-2 hover:border-primary/30 transition-colors">
+                      {businessModel || "Define your revenue model"}
                     </SelectTrigger>
                     <SelectContent>
                       {BUSINESS_MODEL_GROUPS.map(group => (
@@ -384,88 +393,141 @@ export const AddIdeaModal = ({ isOpen, onClose, onIdeaCreated, refreshIdeas }: A
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold text-gray-700">
-                  Additional Context <span className="text-gray-400 font-normal">(Optional)</span>
+              <div className="space-y-4">
+                <Label className="text-lg font-semibold text-gray-800">
+                  Additional Context <span className="text-gray-500 font-normal">(Optional)</span>
                 </Label>
                 <Textarea
-                  className="min-h-[80px] resize-none bg-white"
-                  placeholder="e.g., focus on tools for remote developers..."
+                  className="min-h-[100px] resize-none bg-white border-2 hover:border-primary/30 transition-colors text-base"
+                  placeholder="Share any specific requirements, constraints, or ideas you'd like the AI to consider... e.g., 'focus on tools for remote developers working with microservices'"
                   value={freeform}
                   onChange={e => setFreeform(e.target.value)}
                 />
               </div>
             </div>
             
-            <Button 
-              className="mt-6 w-full h-12 text-base font-semibold shadow-sm" 
-              onClick={handleGenerate} 
-              disabled={loading}
-            >
-              {loading ? 'Generating...' : 'Generate Ideas'}
-            </Button>
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <Button 
+                className="w-full h-14 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200" 
+                onClick={handleGenerate} 
+                disabled={loading}
+                size="lg"
+              >
+                {loading ? (
+                  <>
+                    <Sparkles className="mr-2 h-5 w-5 animate-spin" />
+                    Generating Ideas...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-2 h-5 w-5" />
+                    Generate Ideas
+                  </>
+                )}
+              </Button>
+            </div>
           </TabsContent>
           
-          <TabsContent value="bring-your-own" className="pt-1 min-h-[400px] flex flex-col justify-between">
-            <div className="space-y-6 flex-1">
-              <div className="mb-4">
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  Input the core components of your idea for validation and refinement.
-                </p>
+          <TabsContent value="bring-your-own" className="pt-0 min-h-[500px] flex flex-col justify-between">
+            <div className="space-y-8 flex-1">
+              <div className="p-6 bg-primary/5 rounded-xl border border-primary/20">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-lg bg-primary/10 flex-shrink-0">
+                    <Lightbulb className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-800 mb-2">Create Your Vision</h3>
+                    <p className="text-gray-600 leading-relaxed">
+                      Input the core components of your idea for validation and refinement. Each field helps build a complete picture of your concept.
+                    </p>
+                  </div>
+                </div>
               </div>
               
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">
-                    Idea Title <span className="text-red-500">*</span>
+              <div className="space-y-6">
+                <div className="space-y-3 p-4 border-2 border-red-200 bg-red-50/30 rounded-lg">
+                  <Label className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    <span className="text-red-500 text-xl">*</span>
+                    Idea Title
                   </Label>
                   <Input
-                    className="h-11 text-sm"
-                    placeholder="e.g., AI-Powered Code Review Assistant"
+                    className="h-12 text-base font-medium border-2 border-red-200 focus:border-red-400 bg-white"
+                    placeholder="e.g., Smart Code Review Assistant or Local Food Discovery App"
                     value={userIdea.title}
                     onChange={e => setUserIdea({ ...userIdea, title: e.target.value })}
+                    required
                   />
+                  <p className="text-sm text-gray-500">
+                    Give your idea a memorable, descriptive name that captures its essence
+                  </p>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Hook</Label>
+                <div className="space-y-3">
+                  <Label className="text-lg font-semibold text-gray-800">Hook</Label>
                   <Input
-                    className="h-11 text-sm"
-                    placeholder="A catchy one-liner to grab attention."
+                    className="h-12 text-base border-2 hover:border-primary/30 bg-white transition-colors"
+                    placeholder="A catchy one-liner that immediately communicates your idea's appeal"
                     value={userIdea.hook}
                     onChange={e => setUserIdea({ ...userIdea, hook: e.target.value })}
                   />
+                  <p className="text-sm text-gray-500">
+                    e.g., "The Grammarly for code that catches bugs before they ship"
+                  </p>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Value Proposition</Label>
+                <div className="space-y-3">
+                  <Label className="text-lg font-semibold text-gray-800">Value Proposition</Label>
                   <Textarea
-                    className="min-h-[80px] resize-none"
-                    placeholder="What is the primary value your idea provides?"
+                    className="min-h-[100px] resize-none border-2 hover:border-primary/30 bg-white text-base transition-colors"
+                    placeholder="Describe the core benefit and impact your idea will have on users..."
                     value={userIdea.value}
                     onChange={e => setUserIdea({ ...userIdea, value: e.target.value })}
                   />
+                  <p className="text-sm text-gray-500">
+                    e.g., "Helps developers catch critical bugs during review, reducing production incidents by 60%"
+                  </p>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Differentiator</Label>
+                <div className="space-y-3">
+                  <Label className="text-lg font-semibold text-gray-800">Differentiator</Label>
                   <Input
-                    className="h-11 text-sm"
-                    placeholder="What makes your idea unique?"
+                    className="h-12 text-base border-2 hover:border-primary/30 bg-white transition-colors"
+                    placeholder="What sets your idea apart from existing solutions?"
                     value={userIdea.differentiator}
                     onChange={e => setUserIdea({ ...userIdea, differentiator: e.target.value })}
                   />
+                  <p className="text-sm text-gray-500">
+                    e.g., "It learns from your team's specific coding patterns and past mistakes"
+                  </p>
                 </div>
               </div>
             </div>
             
-            <Button 
-              className="mt-6 w-full h-12 text-base font-semibold shadow-sm" 
-              onClick={handleCreateOwnIdea} 
-              disabled={loading || !userIdea.title.trim()}
-            >
-              {loading ? 'Creating...' : 'Create and Validate Idea'}
-            </Button>
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <Button 
+                className="w-full h-14 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200" 
+                onClick={handleCreateOwnIdea} 
+                disabled={loading || !userIdea.title.trim()}
+                size="lg"
+              >
+                {loading ? (
+                  <>
+                    <CheckCircle className="mr-2 h-5 w-5 animate-pulse" />
+                    Creating & Validating...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="mr-2 h-5 w-5" />
+                    Create and Validate Idea
+                  </>
+                )}
+              </Button>
+              {!userIdea.title.trim() && (
+                <p className="text-sm text-red-500 mt-2 text-center">
+                  Please provide an idea title to continue
+                </p>
+              )}
+            </div>
           </TabsContent>
         </Tabs>
         

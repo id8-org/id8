@@ -189,7 +189,7 @@ export function normalizeIdea(idea: any): NormalizedIdea {
     source_type = idea.source_type;
   }
   // Defensive deep_dive normalization: ensure customer_validation_plan exists
-  let deep_dive = idea.deep_dive && typeof idea.deep_dive === 'object' ? { ...idea.deep_dive } : {};
+  const deep_dive = idea.deep_dive && typeof idea.deep_dive === 'object' ? { ...idea.deep_dive } : {};
   if (deep_dive) {
     const sections = (deep_dive as any).sections;
     // For each major section, ensure customer_validation_plan exists
