@@ -80,8 +80,23 @@
   * {
     @apply border-border;
   }
+  
+  html {
+    /* Prevent horizontal overflow and ensure smooth scrolling */
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+  }
+  
   body {
     @apply bg-background text-foreground;
+    /* Ensure body doesn't have default margins that could cause layout issues */
+    margin: 0;
+    padding: 0;
+    /* Prevent horizontal overflow */
+    overflow-x: hidden;
+    /* Improve text rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
@@ -375,6 +390,51 @@
 
 .sidebar-item.active {
   transform: translateX(8px);
+}
+
+/* Enhanced sidebar accordion transitions */
+.sidebar-accordion {
+  /* Use CSS containment for better performance */
+  contain: layout style paint;
+  /* Smooth width transitions with optimized timing */
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+              min-width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Prevent layout shifts */
+  will-change: width;
+}
+
+/* Enhanced sidebar content transitions */
+.sidebar-content {
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Improved sidebar trigger button */
+.sidebar-trigger {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Add subtle hover effect */
+}
+
+.sidebar-trigger:hover {
+  background-color: hsl(var(--accent) / 0.1);
+  transform: scale(1.05);
+}
+
+/* Enhanced sidebar mobile overlay */
+.sidebar-mobile-overlay {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.5);
+  transition: backdrop-filter 0.3s ease-out;
+}
+
+/* Ensure sidebar container doesn't cause overflow */
+.sidebar-container {
+  /* Prevent any potential overflow issues */
+  overflow: hidden;
+  /* Ensure proper containment */
+  contain: layout style;
 }
 
 /* Enhanced search bar focus effects */
