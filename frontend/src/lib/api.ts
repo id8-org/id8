@@ -372,7 +372,7 @@ export const generateIdea = async (ideaData: Partial<Idea>, user: any) => {
 };
 
 export const triggerDeepDive = async (ideaId: string, user?: any): Promise<DeepDiveResponse> => {
-  let body: any = { request: {} };
+  const body: any = { request: {} };
   if (user) {
     const user_context = await buildUserContext(user);
     body.request.user_context = user_context;

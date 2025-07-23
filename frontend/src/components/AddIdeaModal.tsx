@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
 import { useAuth } from '@/contexts/AuthContext';
-import { Sparkles, Brain, Globe, Target, Zap, Lightbulb, CheckCircle } from 'lucide-react';
+import { Sparkles, Brain, Globe, Target, Zap, Lightbulb, CheckCircle, Building2, Layers, Network, DollarSign, MessageSquare, Wand2 } from 'lucide-react';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectGroup, SelectLabel } from "@/components/ui/select";
 import { BUSINESS_MODEL_GROUPS, BUSINESS_HORIZONTAL_GROUPS, BUSINESS_VERTICAL_GROUPS } from '@/lib/businessOptions';
 import UnifiedIdeaModal from './UnifiedIdeaModal';
@@ -280,192 +281,358 @@ export const AddIdeaModal = ({ isOpen, onClose, onIdeaCreated, refreshIdeas }: A
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-4xl h-full flex flex-col">
-        <DialogHeader className="flex-none">
-          <DialogTitle className="text-2xl font-bold">Add Idea</DialogTitle>
-          <DialogDescription>
-            Add a new idea to your workspace.
+      <DialogContent className="w-full max-w-5xl h-full flex flex-col" role="dialog" aria-labelledby="add-idea-title" aria-describedby="add-idea-desc">
+        <DialogHeader className="flex-none px-8 pt-8 pb-4">
+          <DialogTitle id="add-idea-title" className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent flex items-center gap-3">
+            <Wand2 className="h-8 w-8 text-primary" />
+            Transform Your Vision Into Reality
+          </DialogTitle>
+          <DialogDescription className="text-lg text-muted-foreground mt-2">
+            Whether sparked by AI or born from your imagination, every great idea starts here. Choose your path to innovation.
           </DialogDescription>
         </DialogHeader>
-        <div id="add-idea-desc" style={{display: 'none'}}>Add a new idea to your workspace.</div>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col">
-          <TabsList className="grid w-full grid-cols-2 mb-6 h-12 bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
-            <TabsTrigger value="ai-suggested" className={`text-sm h-12 px-4 font-semibold transition-all ${activeTab === 'ai-suggested' ? 'bg-primary/10 text-primary border-b-2 border-primary' : 'text-gray-700'}`}> 
-              <Sparkles className="mr-2 h-4 w-4" /> AI-Suggested
+        <div id="add-idea-desc" style={{display: 'none'}}>Choose between AI-generated ideas or create your own concept for validation and development.</div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col px-8 pb-8">
+          <TabsList className="grid w-full grid-cols-2 mb-8 h-14 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200 p-1">
+            <TabsTrigger 
+              value="ai-suggested" 
+              className={`text-base h-12 px-6 font-semibold transition-all duration-200 rounded-lg ${
+                activeTab === 'ai-suggested' 
+                  ? 'bg-white text-primary shadow-md border border-primary/20' 
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
+              }`}
+            > 
+              <Sparkles className="mr-3 h-5 w-5" /> 
+              AI-Suggested Ideas
             </TabsTrigger>
-            <TabsTrigger value="bring-your-own" className={`text-sm h-12 px-4 font-semibold transition-all ${activeTab === 'bring-your-own' ? 'bg-primary/10 text-primary border-b-2 border-primary' : 'text-gray-700'}`}> 
-              <Target className="mr-2 h-4 w-4" /> Bring Your Own
+            <TabsTrigger 
+              value="bring-your-own" 
+              className={`text-base h-12 px-6 font-semibold transition-all duration-200 rounded-lg ${
+                activeTab === 'bring-your-own' 
+                  ? 'bg-white text-primary shadow-md border border-primary/20' 
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
+              }`}
+            > 
+              <Target className="mr-3 h-5 w-5" /> 
+              Bring Your Own Idea
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="ai-suggested" className="pt-1 min-h-[400px] flex flex-col justify-between">
-            <div className="space-y-6 flex-1">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="personalization-toggle"
-                  checked={usePersonalization}
-                  onCheckedChange={(checked) => setUsePersonalization(checked === true)}
-                  className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                />
-                <Label htmlFor="personalization-toggle" className="text-sm font-medium text-gray-700">
-                  Use my profile to personalize ideas
-                </Label>
+          <TabsContent value="ai-suggested" className="pt-0 min-h-[500px] flex flex-col justify-between">
+            <div className="space-y-8 flex-1">
+              {/* Personalization Toggle */}
+              <Card className="border-2 border-primary/10 bg-gradient-to-r from-primary/5 to-primary/10">
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <Brain className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <Label htmlFor="personalization-toggle" className="text-base font-semibold text-gray-800 cursor-pointer">
+                          Personalize with your profile
+                        </Label>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {hasCompletedOnboarding 
+                            ? "Use your skills and preferences to generate tailored ideas" 
+                            : "Complete your profile to enable personalized suggestions"
+                          }
+                        </p>
+                      </div>
+                    </div>
+                    <Switch
+                      id="personalization-toggle"
+                      checked={usePersonalization}
+                      onCheckedChange={(checked) => setUsePersonalization(checked)}
+                      disabled={!hasCompletedOnboarding}
+                      aria-describedby="personalization-desc"
+                    />
+                  </div>
+                  <div id="personalization-desc" className="sr-only">
+                    Toggle to enable or disable personalized idea generation using your profile information
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Parameter Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="group hover:shadow-lg transition-all duration-200 border-2 hover:border-primary/20">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-800">
+                      <div className="p-2 rounded-lg bg-blue-100 group-hover:bg-blue-200 transition-colors">
+                        <Building2 className="h-5 w-5 text-blue-600" />
+                      </div>
+                      Industry Focus
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <Select value={industry || 'any'} onValueChange={v => setIndustry(v === 'any' ? '' : v)}>
+                      <SelectTrigger className="h-12 text-sm bg-white border-2 hover:border-primary/20 transition-colors">
+                        {industry || 'Any Industry'}
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="any">Any Industry</SelectItem>
+                        {INDUSTRIES.map(ind => <SelectItem key={ind} value={ind}>{ind}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </CardContent>
+                </Card>
+                
+                <Card className="group hover:shadow-lg transition-all duration-200 border-2 hover:border-primary/20">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-800">
+                      <div className="p-2 rounded-lg bg-green-100 group-hover:bg-green-200 transition-colors">
+                        <Layers className="h-5 w-5 text-green-600" />
+                      </div>
+                      Business Vertical
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <Select value={vertical} onValueChange={setVertical}>
+                      <SelectTrigger className="h-12 text-sm bg-white border-2 hover:border-primary/20 transition-colors">
+                        {vertical || "Choose a vertical market"}
+                      </SelectTrigger>
+                      <SelectContent>
+                        {BUSINESS_VERTICAL_GROUPS.map(group => (
+                          <SelectGroup key={group.label}>
+                            <SelectLabel>{group.label}</SelectLabel>
+                            {group.options.map(option => (
+                              <SelectItem key={option} value={option}>{option}</SelectItem>
+                            ))}
+                          </SelectGroup>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </CardContent>
+                </Card>
+                
+                <Card className="group hover:shadow-lg transition-all duration-200 border-2 hover:border-primary/20">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-800">
+                      <div className="p-2 rounded-lg bg-purple-100 group-hover:bg-purple-200 transition-colors">
+                        <Network className="h-5 w-5 text-purple-600" />
+                      </div>
+                      Business Horizontal
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <Select value={horizontal} onValueChange={setHorizontal}>
+                      <SelectTrigger className="h-12 text-sm bg-white border-2 hover:border-primary/20 transition-colors">
+                        {horizontal || "Select horizontal approach"}
+                      </SelectTrigger>
+                      <SelectContent>
+                        {BUSINESS_HORIZONTAL_GROUPS.map(group => (
+                          <SelectGroup key={group.label}>
+                            <SelectLabel>{group.label}</SelectLabel>
+                            {group.options.map(option => (
+                              <SelectItem key={option} value={option}>{option}</SelectItem>
+                            ))}
+                          </SelectGroup>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </CardContent>
+                </Card>
+                
+                <Card className="group hover:shadow-lg transition-all duration-200 border-2 hover:border-primary/20">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-800">
+                      <div className="p-2 rounded-lg bg-amber-100 group-hover:bg-amber-200 transition-colors">
+                        <DollarSign className="h-5 w-5 text-amber-600" />
+                      </div>
+                      Business Model
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <Select value={businessModel} onValueChange={setBusinessModel}>
+                      <SelectTrigger className="h-12 text-sm bg-white border-2 hover:border-primary/20 transition-colors">
+                        {businessModel || "Define your revenue model"}
+                      </SelectTrigger>
+                      <SelectContent>
+                        {BUSINESS_MODEL_GROUPS.map(group => (
+                          <SelectGroup key={group.label}>
+                            <SelectLabel>{group.label}</SelectLabel>
+                            {group.options.map(option => (
+                              <SelectItem key={option} value={option}>{option}</SelectItem>
+                            ))}
+                          </SelectGroup>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </CardContent>
+                </Card>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-6 rounded-lg border border-gray-200">
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Industry</Label>
-                  <Select value={industry || 'any'} onValueChange={v => setIndustry(v === 'any' ? '' : v)}>
-                    <SelectTrigger className="h-11 text-sm bg-white">
-                      {industry || 'Any'}
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="any">Any</SelectItem>
-                      {INDUSTRIES.map(ind => <SelectItem key={ind} value={ind}>{ind}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Business Vertical</Label>
-                  <Select value={vertical} onValueChange={setVertical}>
-                    <SelectTrigger className="h-11 text-sm bg-white">
-                      {vertical || "Select vertical"}
-                    </SelectTrigger>
-                    <SelectContent>
-                      {BUSINESS_VERTICAL_GROUPS.map(group => (
-                        <SelectGroup key={group.label}>
-                          <SelectLabel>{group.label}</SelectLabel>
-                          {group.options.map(option => (
-                            <SelectItem key={option} value={option}>{option}</SelectItem>
-                          ))}
-                        </SelectGroup>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Business Horizontal</Label>
-                  <Select value={horizontal} onValueChange={setHorizontal}>
-                    <SelectTrigger className="h-11 text-sm bg-white">
-                      {horizontal || "Select horizontal"}
-                    </SelectTrigger>
-                    <SelectContent>
-                      {BUSINESS_HORIZONTAL_GROUPS.map(group => (
-                        <SelectGroup key={group.label}>
-                          <SelectLabel>{group.label}</SelectLabel>
-                          {group.options.map(option => (
-                            <SelectItem key={option} value={option}>{option}</SelectItem>
-                          ))}
-                        </SelectGroup>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Business Model</Label>
-                  <Select value={businessModel} onValueChange={setBusinessModel}>
-                    <SelectTrigger className="h-11 text-sm bg-white">
-                      {businessModel || "Select business model"}
-                    </SelectTrigger>
-                    <SelectContent>
-                      {BUSINESS_MODEL_GROUPS.map(group => (
-                        <SelectGroup key={group.label}>
-                          <SelectLabel>{group.label}</SelectLabel>
-                          {group.options.map(option => (
-                            <SelectItem key={option} value={option}>{option}</SelectItem>
-                          ))}
-                        </SelectGroup>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold text-gray-700">
-                  Additional Context <span className="text-gray-400 font-normal">(Optional)</span>
-                </Label>
-                <Textarea
-                  className="min-h-[80px] resize-none bg-white"
-                  placeholder="e.g., focus on tools for remote developers..."
-                  value={freeform}
-                  onChange={e => setFreeform(e.target.value)}
-                />
-              </div>
+              {/* Additional Context Card */}
+              <Card className="border-2 border-gray-200 hover:border-primary/20 transition-colors">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-800">
+                    <div className="p-2 rounded-lg bg-indigo-100">
+                      <MessageSquare className="h-5 w-5 text-indigo-600" />
+                    </div>
+                    Additional Context
+                    <span className="text-sm font-normal text-gray-500">(Optional)</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <Textarea
+                    className="min-h-[100px] resize-none bg-white border-2 hover:border-primary/20 transition-colors text-sm"
+                    placeholder="Share any specific requirements, constraints, or ideas you'd like the AI to consider... e.g., 'focus on tools for remote developers working with microservices'"
+                    value={freeform}
+                    onChange={e => setFreeform(e.target.value)}
+                  />
+                </CardContent>
+              </Card>
             </div>
             
-            <Button 
-              className="mt-6 w-full h-12 text-base font-semibold shadow-sm" 
-              onClick={handleGenerate} 
-              disabled={loading}
-            >
-              {loading ? 'Generating...' : 'Generate Ideas'}
-            </Button>
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <Button 
+                className="w-full h-14 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary flex items-center justify-center gap-3" 
+                onClick={handleGenerate} 
+                disabled={loading}
+                size="lg"
+              >
+                {loading ? (
+                  <>
+                    <Sparkles className="h-5 w-5 animate-spin" />
+                    Generating Ideas...
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="h-5 w-5" />
+                    Generate Ideas
+                  </>
+                )}
+              </Button>
+            </div>
           </TabsContent>
           
-          <TabsContent value="bring-your-own" className="pt-1 min-h-[400px] flex flex-col justify-between">
-            <div className="space-y-6 flex-1">
-              <div className="mb-4">
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  Input the core components of your idea for validation and refinement.
-                </p>
-              </div>
+          <TabsContent value="bring-your-own" className="pt-0 min-h-[500px] flex flex-col justify-between">
+            <div className="space-y-8 flex-1">
+              {/* Introduction Card */}
+              <Card className="border-2 border-primary/10 bg-gradient-to-r from-primary/5 to-primary/10">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-lg bg-primary/10 flex-shrink-0">
+                      <Lightbulb className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-800 mb-2">Craft Your Vision</h3>
+                      <p className="text-gray-600 leading-relaxed">
+                        Transform your concept into a structured idea ready for validation. Fill in the story of your innovation—each field helps build a complete picture of your vision.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
               
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">
-                    Idea Title <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    className="h-11 text-sm"
-                    placeholder="e.g., AI-Powered Code Review Assistant"
-                    value={userIdea.title}
-                    onChange={e => setUserIdea({ ...userIdea, title: e.target.value })}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Hook</Label>
-                  <Input
-                    className="h-11 text-sm"
-                    placeholder="A catchy one-liner to grab attention."
-                    value={userIdea.hook}
-                    onChange={e => setUserIdea({ ...userIdea, hook: e.target.value })}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Value Proposition</Label>
-                  <Textarea
-                    className="min-h-[80px] resize-none"
-                    placeholder="What is the primary value your idea provides?"
-                    value={userIdea.value}
-                    onChange={e => setUserIdea({ ...userIdea, value: e.target.value })}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Differentiator</Label>
-                  <Input
-                    className="h-11 text-sm"
-                    placeholder="What makes your idea unique?"
-                    value={userIdea.differentiator}
-                    onChange={e => setUserIdea({ ...userIdea, differentiator: e.target.value })}
-                  />
-                </div>
+              {/* Madlib-style Form */}
+              <div className="space-y-6">
+                {/* Idea Title */}
+                <Card className="border-2 border-red-200 bg-red-50/30">
+                  <CardContent className="pt-6">
+                    <Label className="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-3">
+                      <span className="text-red-500 text-xl">*</span>
+                      My idea is called
+                    </Label>
+                    <Input
+                      className="h-12 text-base font-medium border-2 border-red-200 focus:border-red-400 bg-white"
+                      placeholder="e.g., 'Smart Code Review Assistant' or 'Local Food Discovery App'"
+                      value={userIdea.title}
+                      onChange={e => setUserIdea({ ...userIdea, title: e.target.value })}
+                      required
+                      aria-describedby="title-help"
+                    />
+                    <p id="title-help" className="text-sm text-gray-500 mt-2">
+                      Give your idea a memorable, descriptive name that captures its essence
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Hook */}
+                <Card className="border-2 border-gray-200 hover:border-primary/20 transition-colors">
+                  <CardContent className="pt-6">
+                    <Label className="text-lg font-semibold text-gray-800 mb-3 block">
+                      In one catchy sentence, it's
+                    </Label>
+                    <Input
+                      className="h-12 text-base border-2 hover:border-primary/20 bg-white"
+                      placeholder="e.g., 'The Grammarly for code that catches bugs before they ship'"
+                      value={userIdea.hook}
+                      onChange={e => setUserIdea({ ...userIdea, hook: e.target.value })}
+                      aria-describedby="hook-help"
+                    />
+                    <p id="hook-help" className="text-sm text-gray-500 mt-2">
+                      A memorable one-liner that immediately communicates your idea's appeal
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Value Proposition */}
+                <Card className="border-2 border-gray-200 hover:border-primary/20 transition-colors">
+                  <CardContent className="pt-6">
+                    <Label className="text-lg font-semibold text-gray-800 mb-3 block">
+                      The main value it provides is
+                    </Label>
+                    <Textarea
+                      className="min-h-[100px] resize-none border-2 hover:border-primary/20 bg-white text-base"
+                      placeholder="e.g., 'It helps developers catch critical bugs and security issues during code review, reducing production incidents by 60% and saving teams hours of debugging time'"
+                      value={userIdea.value}
+                      onChange={e => setUserIdea({ ...userIdea, value: e.target.value })}
+                      aria-describedby="value-help"
+                    />
+                    <p id="value-help" className="text-sm text-gray-500 mt-2">
+                      Describe the core benefit and impact your idea will have on users
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Differentiator */}
+                <Card className="border-2 border-gray-200 hover:border-primary/20 transition-colors">
+                  <CardContent className="pt-6">
+                    <Label className="text-lg font-semibold text-gray-800 mb-3 block">
+                      What makes it unique is
+                    </Label>
+                    <Input
+                      className="h-12 text-base border-2 hover:border-primary/20 bg-white"
+                      placeholder="e.g., 'It learns from your team's specific coding patterns and past mistakes'"
+                      value={userIdea.differentiator}
+                      onChange={e => setUserIdea({ ...userIdea, differentiator: e.target.value })}
+                      aria-describedby="differentiator-help"
+                    />
+                    <p id="differentiator-help" className="text-sm text-gray-500 mt-2">
+                      Highlight what sets your idea apart from existing solutions
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
             </div>
             
-            <Button 
-              className="mt-6 w-full h-12 text-base font-semibold shadow-sm" 
-              onClick={handleCreateOwnIdea} 
-              disabled={loading || !userIdea.title.trim()}
-            >
-              {loading ? 'Creating...' : 'Create and Validate Idea'}
-            </Button>
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <Button 
+                className="w-full h-14 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary flex items-center justify-center gap-3" 
+                onClick={handleCreateOwnIdea} 
+                disabled={loading || !userIdea.title.trim()}
+                size="lg"
+              >
+                {loading ? (
+                  <>
+                    <CheckCircle className="h-5 w-5 animate-pulse" />
+                    Creating & Validating...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-5 w-5" />
+                    Create and Validate Idea
+                  </>
+                )}
+              </Button>
+              {!userIdea.title.trim() && (
+                <p className="text-sm text-red-500 mt-2 text-center">
+                  Please provide an idea title to continue
+                </p>
+              )}
+            </div>
           </TabsContent>
         </Tabs>
         
