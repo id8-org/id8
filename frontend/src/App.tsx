@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Toaster } from './components/ui/toaster';
 import { LoginForm } from './components/auth/LoginForm';
+import { RegisterForm } from './components/auth/RegisterForm';
 import { OnboardingWizard } from './components/onboarding/OnboardingWizard';
 import { getAllIdeas, generateIdea } from './lib/api';
 import './App.css';
@@ -54,6 +55,7 @@ const queryClient = new QueryClient({
 function AppContent() {
   const { user, isLoading } = useAuth();
   const [addIdeaModalOpen, setAddIdeaModalOpen] = useState(false);
+  const [isLoginMode, setIsLoginMode] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -66,7 +68,15 @@ function AppContent() {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
   if (!user) {
-    return <div className="flex items-center justify-center h-screen bg-slate-50"><LoginForm onSwitchToRegister={() => {}} /></div>;
+    return (
+      <div className="flex items-center justify-center h-screen bg-slate-50">
+        {isLoginMode ? (
+          <LoginForm onSwitchToRegister={() => setIsLoginMode(false)} />
+        ) : (
+          <RegisterForm onSwitchToLogin={() => setIsLoginMode(true)} />
+        )}
+      </div>
+    );
   }
   // Render Kanban board inside Layout with sidebar and header
   return (
