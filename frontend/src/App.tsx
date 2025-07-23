@@ -62,13 +62,10 @@ function AppContent() {
     }
   }, [user, navigate]);
 
-  // TEMP: For UI development, bypass auth
-  const isDev = import.meta.env.DEV;
-  
-  if (isLoading && !isDev) {
+  if (isLoading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
-  if (!user && !isDev) {
+  if (!user) {
     return <div className="flex items-center justify-center h-screen bg-slate-50"><LoginForm onSwitchToRegister={() => {}} /></div>;
   }
   // Render Kanban board inside Layout with sidebar and header
