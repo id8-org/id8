@@ -2,9 +2,9 @@ import React from 'react';
 
 export const HeroSection: React.FC = () => {
   return (
-    <div className="relative min-h-[60vh] overflow-hidden">
-      {/* Background gradient representing sky transition from dawn to data flows */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-purple-900 to-indigo-900" />
+    <div className="relative w-full h-full overflow-hidden">
+      {/* Background gradient representing innovation and data flows */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900" />
       
       {/* Animated data flow overlay */}
       <div className="absolute inset-0 opacity-30">
@@ -14,25 +14,37 @@ export const HeroSection: React.FC = () => {
         <div className="absolute top-3/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent animate-pulse" style={{ animationDelay: '3s' }} />
       </div>
 
-      {/* Mountain silhouette */}
-      <div className="absolute bottom-0 left-0 w-full">
-        <svg viewBox="0 0 1200 300" className="w-full h-auto text-slate-800 fill-current">
-          <path d="M0,300 L0,200 L200,100 L400,150 L600,80 L800,120 L1000,60 L1200,100 L1200,300 Z" />
-        </svg>
+      {/* Featured Image Area - Placeholder for provided image */}
+      {/* TODO: Replace with actual image from https://chatgpt.com/s/m_6881788222248191b5e2cc2108425568 */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="relative z-10 max-w-lg mx-auto px-8">
+          {/* Main featured image placeholder */}
+          <div className="mb-8 text-center">
+            <div className="w-64 h-64 mx-auto bg-gradient-to-br from-cyan-400/20 to-blue-400/20 rounded-2xl flex items-center justify-center border border-cyan-400/30 backdrop-blur-sm shadow-2xl">
+              {/* Placeholder content - to be replaced with actual image */}
+              <div className="text-center p-6">
+                <div className="w-24 h-24 mx-auto bg-gradient-to-br from-cyan-400 to-blue-400 rounded-full flex items-center justify-center mb-4">
+                  <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+                <div className="text-white/80 text-sm font-medium">
+                  Featured Image Placeholder
+                  <br />
+                  <span className="text-xs text-cyan-300">
+                    Replace with provided image
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Cliff edge and figure silhouette */}
-      <div className="absolute bottom-0 right-1/4 w-32 h-40">
-        <svg viewBox="0 0 128 160" className="w-full h-full text-slate-700 fill-current">
-          {/* Cliff edge */}
-          <path d="M0,160 L0,40 L80,20 L100,30 L120,25 L128,35 L128,160 Z" />
-          {/* Figure silhouette */}
-          <ellipse cx="85" cy="35" rx="3" ry="4" className="text-slate-900 fill-current" />
-          <path d="M85,39 L85,55 M80,45 L90,45 M85,55 L80,70 M85,55 L90,70" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                fill="none" 
-                className="text-slate-900" />
+      {/* Mountain silhouette */}
+      <div className="absolute bottom-0 left-0 w-full">
+        <svg viewBox="0 0 1200 300" className="w-full h-auto text-slate-800 fill-current opacity-60">
+          <path d="M0,300 L0,200 L200,100 L400,150 L600,80 L800,120 L1000,60 L1200,100 L1200,300 Z" />
         </svg>
       </div>
 
@@ -51,44 +63,38 @@ export const HeroSection: React.FC = () => {
                 fill="none" 
                 className="animate-pulse" />
         </svg>
+      </div>
+
+      {/* Content overlay */}
+      <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-8 z-10">
+        {/* Logo */}
+        <div className="mb-8">
+          <img 
+            src="/id8logo.png" 
+            alt="ID8 Logo" 
+            className="w-20 h-20 mx-auto mb-4 drop-shadow-lg"
+          />
+        </div>
         
-        {/* Wireframe elements */}
-        <div className="absolute top-1/6 right-1/4 w-16 h-10 border border-blue-300 opacity-30 animate-pulse" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-2/5 left-1/6 w-12 h-8 border border-purple-300 opacity-25 animate-pulse" style={{ animationDelay: '2.5s' }} />
+        {/* Main headline */}
+        <h1 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
+          ID8: Think in Versions.
+          <br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">
+            Create with Intelligence.
+          </span>
+        </h1>
+        
+        {/* Subtext */}
+        <p className="text-base lg:text-lg text-gray-200 leading-relaxed max-w-md mx-auto">
+          ID8 is the first system for thinking that evolves like software. Track your ideas with version control, 
+          memory, scoring, and transparent logic.{' '}
+          <span className="text-cyan-300 font-semibold">It's GitHub for ideas.</span>
+        </p>
       </div>
 
       {/* Mist effect */}
-      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white/10 to-transparent" />
-
-      {/* Hero content */}
-      <div className="relative z-10 flex flex-col items-center justify-center h-full px-4 pt-16 pb-8">
-        <div className="text-center max-w-4xl mx-auto">
-          {/* Logo */}
-          <div className="mb-8">
-            <img 
-              src="/id8logo.png" 
-              alt="ID8 Logo" 
-              className="w-20 h-20 mx-auto mb-4 drop-shadow-lg"
-            />
-          </div>
-          
-          {/* Main headline */}
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
-            ID8: Think in Versions.
-            <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">
-              Create with Intelligence.
-            </span>
-          </h1>
-          
-          {/* Subtext */}
-          <p className="text-lg md:text-xl text-gray-200 mb-8 leading-relaxed max-w-3xl mx-auto">
-            ID8 is the first system for thinking that evolves like software. Track your ideas with version control, 
-            memory, scoring, and transparent logic.{' '}
-            <span className="text-cyan-300 font-semibold">It's GitHub for ideas.</span>
-          </p>
-        </div>
-      </div>
+      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-black/10 to-transparent" />
     </div>
   );
 };
