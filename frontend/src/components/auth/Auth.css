@@ -1,0 +1,32 @@
+.auth-container {
+    display: flex;
+    height: 100vh;
+}
+
+.auth-image {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f4f4f4;
+}
+
+.auth-image img {
+    max-width: 100%;
+    height: auto;
+}
+
+.auth-form {
+    flex: 1;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #ffffff;
+}
+
+/* Ensure a strict 50/50 split */
+.auth-container > .auth-image,
+.auth-container > .auth-form {
+    flex: 1 1 50%;
+}
