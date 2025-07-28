@@ -4,7 +4,7 @@ from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Body, Header, Request, status
 from fastapi.responses import JSONResponse, HTMLResponse
 from sqlalchemy.orm import Session
-from app.llm import generate_deep_dive, generate_idea_pitches, orchestrate_iterating, orchestrate_considering, clean_text_with_llm, render_prompt, call_groq, analyze_version_impact, validate_idea_dict, is_unique_differentiator, is_specific_problem_statement, is_real_actionable_cta, is_real_repo_url, is_compelling_pitch, generate_deep_dive_pydanticai, generate_iterating_pydanticai, generate_considering_pydanticai
+from app.llm_center.legacy_wrappers import generate_deep_dive, generate_idea_pitches, orchestrate_iterating, orchestrate_considering, clean_text_with_llm, render_prompt, call_groq, analyze_version_impact, validate_idea_dict, is_unique_differentiator, is_specific_problem_statement, is_real_actionable_cta, is_real_repo_url, is_compelling_pitch, generate_deep_dive_pydanticai, generate_iterating_pydanticai, generate_considering_pydanticai
 from app.services.idea_service import ask_llm_with_context
 from app.db import get_db
 from app.auth import get_current_active_user

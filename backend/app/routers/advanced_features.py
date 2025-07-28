@@ -31,7 +31,7 @@ from app.models import (
     InvestorDeck as InvestorDeckModel,
     Idea, ExportRecord, DeepDiveVersion
 )
-from app.llm import (
+from app.llm_center.legacy_wrappers import (
     generate_case_study,
     generate_market_snapshot,
     generate_lens_insight,

@@ -1,0 +1,35 @@
+Perform a comprehensive deep dive analysis of the following idea:
+
+{{ content }}
+
+{% if context and context.additional_context %}
+Additional Context:
+{% for key, value in context.additional_context.items() %}
+- {{ key }}: {{ value }}
+{% endfor %}
+{% endif %}
+
+Provide a detailed JSON analysis including:
+
+{
+  "Signal Score": {
+    "Product-Market Fit Potential": score (0-10),
+    "Market Size": score (0-10), 
+    "Market Timing": score (0-10),
+    "Founder's Ability to Execute": score (0-10),
+    "Technical Feasibility": score (0-10),
+    "Competitive Moat": score (0-10),
+    "Profitability Potential": score (0-10),
+    "Strategic Exit Potential": score (0-10),
+    "Regulatory Risk": score (0-10),
+    "Go to Market": score (0-10),
+    "Overall Investor Attractiveness": score (0-10)
+  },
+  "Product": "Product-market fit analysis",
+  "Market": "Market size and opportunity analysis", 
+  "Timing": "Market timing assessment",
+  "Moat": "Competitive moat evaluation",
+  "Summary": "Executive summary of investment potential"
+}
+
+Provide thorough analysis for each dimension with specific, actionable insights.

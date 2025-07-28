@@ -48,7 +48,7 @@ async def trigger_deepdive(idea_id: str, db: Session = Depends(get_db)):
             "score": idea.score,
             "mvp_effort": idea.mvp_effort
         }
-        from app.llm import generate_deep_dive
+        from app.llm_center.legacy_wrappers import generate_deep_dive
         result = await generate_deep_dive(idea_data)
         if not result:
             raise HTTPException(status_code=500, detail="Deep dive generation failed")

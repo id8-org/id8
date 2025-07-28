@@ -1,0 +1,28 @@
+Analyze the following idea to determine if it should move forward in the consideration process:
+
+{{ content }}
+
+{% if context and context.additional_context %}
+Additional Context:
+{% for key, value in context.additional_context.items() %}
+- {{ key }}: {{ value }}
+{% endfor %}
+{% endif %}
+
+Return a JSON response with:
+{
+  "consideringTable": [
+    {
+      "criteria": "Evaluation criteria",
+      "assessment": "Current assessment",
+      "confidence": "High/Medium/Low",
+      "evidence": "Supporting evidence",
+      "concerns": "Key concerns or risks"
+    }
+  ],
+  "recommendation": "Go/No-Go/Need More Info",
+  "rationale": "Reasoning for recommendation",
+  "conditions": "Conditions that must be met to proceed"
+}
+
+Provide objective analysis based on market evidence and business fundamentals.

@@ -1,0 +1,20 @@
+Provide guidance for building the following idea:
+
+{{ content }}
+
+{% if context and context.additional_context %}
+Additional Context:
+{% for key, value in context.additional_context.items() %}
+- {{ key }}: {{ value }}
+{% endfor %}
+{% endif %}
+
+Return detailed building recommendations including:
+- Technical architecture suggestions
+- Development roadmap
+- Resource requirements
+- Key milestones
+- Risk mitigation strategies
+- Go-to-market timeline
+
+Focus on practical, actionable guidance for execution.

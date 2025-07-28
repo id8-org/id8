@@ -9,6 +9,7 @@ from app.models import (
     Idea, LLMInputLog, LLMProcessingLog, LLMInputLogCreate, 
     LLMProcessingLogCreate, User
 )
+from app.llm_center import LLMCenter, PromptType, ProcessingContext
 import dspy
 
 
@@ -17,6 +18,7 @@ class AIService(ABC):
     
     def __init__(self, session: Session):
         self.session = session
+        self.llm_center = LLMCenter(db_session=session)
     
     @abstractmethod
     def process_stage(self, idea: Idea, user: User, **kwargs) -> Dict[str, Any]:
@@ -36,6 +38,30 @@ class AIService(ABC):
     def get_stage_name(self) -> str:
         """Return the name of this stage"""
         pass
+    
+    async def call_llm_for_stage(
+        self,
+        prompt_type: PromptType,
+        content: str,
+        user: User,
+        idea: Optional[Idea] = None,
+        **kwargs
+    ) -> Any:
+        """Call LLM using the centralized service for this stage"""
+        context = ProcessingContext(
+            user_id=str(user.id),
+            idea_id=str(idea.id) if idea else None,
+            stage=self.get_stage_name(),
+            additional_context=kwargs
+        )
+        
+        response = await self.llm_center.call_llm(
+            prompt_type=prompt_type,
+            content=content,
+            context=context
+        )
+        
+        return response
     
     def log_llm_interaction(
         self, 
@@ -98,10 +124,11 @@ class StagePrompt(dspy.Signature):
 class StageProcessor(dspy.Module):
     """Base DSPy module for processing idea stages"""
     
-    def __init__(self, stage_name: str, custom_instructions: str = ""):
+    def __init__(self, stage_name: str, custom_instructions: str = "", llm_center: Optional[LLMCenter] = None):
         super().__init__()
         self.stage_name = stage_name
         self.custom_instructions = custom_instructions
+        self.llm_center = llm_center or LLMCenter()
         self.generate = dspy.ChainOfThought(StagePrompt)
     
     def forward(self, idea_title: str, idea_description: str, stage_context: str = ""):

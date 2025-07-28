@@ -1,7 +1,7 @@
 import asyncio
 from app.db import SessionLocal
 from app.models import Repo, Idea, User, Team
-from app.llm import generate_idea_pitches
+from app.llm_center.legacy_wrappers import generate_idea_pitches
 from app.services.github import github_service
 
 LANGUAGES = ["Python", "TypeScript", "JavaScript", "Rust", "Go", "Ruby"]

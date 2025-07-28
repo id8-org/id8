@@ -1,0 +1,28 @@
+Analyze the following idea for iteration and experimentation opportunities:
+
+{{ content }}
+
+{% if context and context.additional_context %}
+Additional Context:
+{% for key, value in context.additional_context.items() %}
+- {{ key }}: {{ value }}
+{% endfor %}
+{% endif %}
+
+Return a JSON response with:
+{
+  "iteratingTable": [
+    {
+      "experiment": "Experiment description",
+      "hypothesis": "What we expect to learn",
+      "metrics": "How to measure success", 
+      "duration": "How long to run",
+      "cost": "Estimated cost",
+      "priority": "High/Medium/Low"
+    }
+  ],
+  "summary": "Overall iteration strategy",
+  "nextSteps": "Recommended next actions"
+}
+
+Focus on low-cost, high-learning experiments that validate key assumptions.
