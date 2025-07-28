@@ -69,12 +69,12 @@ export const useGoogleAuth = () => {
       console.log('Creating Google OAuth client...');
       // Create Google OAuth client for authorization code flow
       const client = window.google.accounts.oauth2.initCodeClient({
-        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID, // Use the environment variable here
         scope: 'openid email profile',
         redirect_uri: window.location.origin, // Use current origin as redirect URI
         callback: async (response: GoogleOAuthResponse) => {
           console.log('Google OAuth callback triggered:', response);
-          
+
           if (response.error) {
             console.error('Google OAuth error:', response.error);
             throw new Error(`Google OAuth error: ${response.error}`);
@@ -88,7 +88,7 @@ export const useGoogleAuth = () => {
           try {
             console.log('Sending authorization code to backend...');
             // Send the authorization code to our backend for processing
-            const authResponse = await api.post('/auth/google/code', {
+            const authResponse = await api.post('/api/auth/google/code', { // Corrected endpoint
               code: response.code,
             });
 
@@ -116,4 +116,4 @@ export const useGoogleAuth = () => {
     signInWithGoogle,
     initializeGoogleAuth,
   };
-}; 
+};

@@ -32,3 +32,4 @@ fastapi
 starlette
 greenlet
 dspy-ai
+sqlmodel

@@ -62,8 +62,7 @@ app.include_router(audit.router, prefix="/api/audit", tags=["audit"])
 app.include_router(iteration_router.router, prefix="/api/iterating", tags=["iterating"])
 app.include_router(llm_router.router, prefix="/api/llm", tags=["llm"])
 app.include_router(lifecycle_map_router, prefix="/api/lifecycle", tags=["lifecycle"])
-# Removed legacy router - endpoints were experimental and unused
-# app.include_router(websocket.router, tags=["websocket"])  # Remove
+
 
 db_ready = False
 

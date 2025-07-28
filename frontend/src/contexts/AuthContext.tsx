@@ -94,7 +94,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       refreshApiAuthHeader();
       
       // Fetch user data
-      const userResponse = await api.get('/auth/me');
+      const userResponse = await api.get('/api/auth/me'); // Changed endpoint
       setUser(userResponse.data);
       setConfig(userResponse.data.config || null);
     } catch (error: unknown) {
@@ -107,19 +107,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       localStorage.setItem('token', access_token);
       setToken(access_token);
-      refreshApiAuthHeader();
-      
-      // Set the Authorization header immediately
-      api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-      
-      // Fetch user data
-      const userResponse = await api.get('/auth/me');
-      setUser(userResponse.data);
-      setConfig(userResponse.data.config || null);
-    } catch (error: unknown) {
+      refreshApiAuthHeader(access_token); // Important!
+      const response = await api.get('/api/auth/me');
+      setUser(response.data);
+      localStorage.setItem('user', JSON.stringify(response.data));
+      await getProfile();
+    } catch (error: any) {
       console.error('Token login error:', error);
-      const apiError = error as { response?: { data?: { detail?: string } } };
-      throw new Error(apiError.response?.data?.detail || 'Token login failed');
+      setToken(null);
+      setUser(null);
+      setConfig(null);
+      localStorage.removeItem('token');
+      throw new Error('Token login failed');
     }
   };
 
