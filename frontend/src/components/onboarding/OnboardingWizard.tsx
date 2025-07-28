@@ -20,15 +20,13 @@ import {
   ArrowRight,
   ArrowLeft,
   AlertCircle,
-  Sparkles,
-  Lightbulb
+  Sparkles
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toSnakeCase } from '@/lib/utils';
 import { BUSINESS_MODEL_GROUPS, BUSINESS_HORIZONTAL_GROUPS, BUSINESS_VERTICAL_GROUPS, fetchBusinessOptions, BusinessOptionsResponse } from '@/lib/businessOptions';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface OnboardingWizardProps {
   onComplete: () => void;
@@ -116,8 +114,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
   const [privacyChecked, setPrivacyChecked] = useState(false);
   const [termsChecked, setTermsChecked] = useState(false);
   
-  // Add state for idea generation modal
-  const [showIdeaGenerationModal, setShowIdeaGenerationModal] = useState(false);
+  // Add state for idea generation progress
   const [isGeneratingIdeas, setIsGeneratingIdeas] = useState(false);
 
   const resumeUploaded = resumeUploadStatus === 'success';
@@ -882,11 +879,11 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
       // API call to update profile
       await api.put('/auth/profile', updateData);
 
-      // After the final step, refresh the user data
+      // After the final step, refresh the user data and automatically generate ideas
       if (step === totalSteps) {
         await updateProfile(); // Call refreshUser here
-        // Show idea generation modal instead of calling onComplete immediately
-        setShowIdeaGenerationModal(true);
+        // Automatically generate ideas without requiring user input
+        await handleGenerateIdeasAutomatically();
       }
 
       setCurrentStep(step + 1);
@@ -930,8 +927,8 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
     }
   };
 
-  // Handlers for idea generation modal
-  const handleGenerateIdeas = async () => {
+  // Automatically generate ideas after onboarding completion
+  const handleGenerateIdeasAutomatically = async () => {
     setIsGeneratingIdeas(true);
     try {
       // Generate personalized ideas based on the completed profile
@@ -947,11 +944,10 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
 
       toast({
         title: "Ideas Generated!",
-        description: `Generated ${response.data.ideas?.length || 0} personalized ideas based on your profile. You can find them on your dashboard.`,
+        description: `Generated ${response.data.ideas?.length || 0} personalized ideas based on your profile. You'll see them on your dashboard.`,
       });
       
-      // Close modal and complete onboarding
-      setShowIdeaGenerationModal(false);
+      // Complete onboarding
       onComplete?.();
     } catch (error) {
       console.error('Error generating ideas:', error);
@@ -962,16 +958,10 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
       });
       
       // Still complete onboarding even if idea generation fails
-      setShowIdeaGenerationModal(false);
       onComplete?.();
     } finally {
       setIsGeneratingIdeas(false);
     }
-  };
-
-  const handleSkipIdeaGeneration = () => {
-    setShowIdeaGenerationModal(false);
-    onComplete?.();
   };
 
   if (optionsLoading) {
@@ -1004,10 +994,17 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
           {isLoading ? (
             "Saving..."
           ) : currentStep === totalSteps ? (
-            <>
-              Complete Setup
-              <CheckCircle className="w-4 h-4 ml-2" />
-            </>
+            isGeneratingIdeas ? (
+              <>
+                <Sparkles className="mr-2 h-4 w-4 animate-spin" />
+                Generating Ideas...
+              </>
+            ) : (
+              <>
+                Complete Setup & Generate Ideas
+                <Sparkles className="w-4 h-4 ml-2" />
+              </>
+            )
           ) : (
             <>
               Next
@@ -1016,64 +1013,6 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
           )}
         </Button>
       </div>
-
-      {/* Idea Generation Modal */}
-      <Dialog open={showIdeaGenerationModal} onOpenChange={setShowIdeaGenerationModal}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-blue-600" />
-              Generate Your First Ideas
-            </DialogTitle>
-            <DialogDescription>
-              Your profile is complete! Would you like us to generate personalized startup ideas based on your skills, interests, and preferences?
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="flex flex-col gap-4 mt-4">
-            <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
-              <div className="flex items-start gap-3">
-                <Lightbulb className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-medium text-blue-900 mb-1">Personalized Ideas</h4>
-                  <p className="text-sm text-blue-700">
-                    We'll create ideas tailored to your {formData.interests?.slice(0, 2).join(' and ')} interests, 
-                    {formData.experienceYears} years of experience, and {formData.goals?.slice(0, 2).join(' and ')} goals.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <Button 
-                variant="outline" 
-                onClick={handleSkipIdeaGeneration}
-                className="flex-1"
-                disabled={isGeneratingIdeas}
-              >
-                Skip for Now
-              </Button>
-              <Button 
-                onClick={handleGenerateIdeas} 
-                disabled={isGeneratingIdeas}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              >
-                {isGeneratingIdeas ? (
-                  <>
-                    <Sparkles className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Generate Ideas
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

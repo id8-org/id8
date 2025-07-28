@@ -1,7 +1,7 @@
 // IMPORTANT: This component must only be rendered as a child of the main app layout, which provides the sidebar.
 // If you render this directly, the sidebar will not appear.
 
-import React, { useState, useEffect, type ReactElement, useRef } from 'react';
+import React, { useState, useEffect, useCallback, type ReactElement, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
@@ -90,7 +90,7 @@ interface IdeaWorkspaceProps {
   setModalIdea: (idea: NormalizedIdea | null) => void;
   onOpenModal?: (idea: NormalizedIdea) => void;
   onAddIdea?: () => void;
-  openAskAI: (context: { type: 'profile' } | { type: 'idea', idea: any } | { type: 'version', idea: any, version: number }) => void;
+  openAskAI: (context: { type: 'profile' } | { type: 'idea', idea: NormalizedIdea } | { type: 'version', idea: NormalizedIdea, version: number }) => void;
 }
 
 interface FilterState {
@@ -177,7 +177,7 @@ function getBlankIdea(): NormalizedIdea {
 }
 
 // Add a normalization helper for ideas
-export function normalizeIdea(idea: any): NormalizedIdea {
+export function normalizeIdea(idea: Partial<NormalizedIdea> & { id?: string }): NormalizedIdea {
   let type = idea.type;
   if (typeof type === 'string') {
     const t = type.trim().toLowerCase().replace(/[-_\s]/g, '');
@@ -191,18 +191,19 @@ export function normalizeIdea(idea: any): NormalizedIdea {
   // Defensive deep_dive normalization: ensure customer_validation_plan exists
   const deep_dive = idea.deep_dive && typeof idea.deep_dive === 'object' ? { ...idea.deep_dive } : {};
   if (deep_dive) {
-    const sections = (deep_dive as any).sections;
+    const sections = (deep_dive as Record<string, unknown>).sections;
     // For each major section, ensure customer_validation_plan exists
     ['market_opportunity', 'execution_capability', 'business_viability', 'strategic_alignment_risks'].forEach(key => {
-      if (deep_dive[key]) {
-        if (typeof deep_dive[key].customer_validation_plan !== 'string') {
-          deep_dive[key].customer_validation_plan = '';
+      const section = (deep_dive as Record<string, Record<string, unknown>>)[key];
+      if (section) {
+        if (typeof section.customer_validation_plan !== 'string') {
+          section.customer_validation_plan = '';
         }
       }
     });
     // Defensive: if sections exist, keep them
     if (sections) {
-      (deep_dive as any).sections = sections;
+      (deep_dive as Record<string, unknown>).sections = sections;
     }
   }
   return {
@@ -214,7 +215,7 @@ export function normalizeIdea(idea: any): NormalizedIdea {
   } as NormalizedIdea;
 }
 
-const normalizeIdeas = (ideas: any[]): NormalizedIdea[] => ideas.map(normalizeIdea);
+const normalizeIdeas = (ideas: Array<Partial<NormalizedIdea> & { id?: string }>): NormalizedIdea[] => ideas.map(normalizeIdea);
 
 export function IdeaWorkspace({ 
   ideasByStage,
@@ -539,7 +540,7 @@ export function IdeaWorkspace({
   };
 
   // Helper to fetch all ideas by stage and update state
-  const fetchAllIdeasByStageAndUpdate = async () => {
+  const fetchAllIdeasByStageAndUpdate = useCallback(async () => {
     const statuses = ['suggested', 'deep_dive', 'iterating', 'considering', 'closed'];
     const results: Record<string, NormalizedIdea[]> = {};
     for (const status of statuses) {
@@ -606,14 +607,14 @@ export function IdeaWorkspace({
       });
       return stillPending;
     });
-  };
+  }, []);
 
   // Polling to keep board current
   React.useEffect(() => {
     fetchAllIdeasByStageAndUpdate(); // Initial load
     const interval = setInterval(fetchAllIdeasByStageAndUpdate, 10000); // Poll every 10s
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchAllIdeasByStageAndUpdate]);
 
   // After any drag/drop or status change, refresh all columns
   const onDragEnd = async (result: DropResult) => {
@@ -1053,29 +1054,30 @@ export function IdeaWorkspace({
       <main className="flex-1 min-w-0">
         <DragDropContext onDragEnd={onDragEnd}>
           <div className="flex gap-4 min-h-[80vh] w-full p-4">
-              {LIFECYCLE_STAGES.map((stage, colIdx) => {
-                const ideasForStage = kanbanIdeasByStage[stage.key as Stage].map(normalizeIdea);
-                const analytics = getStageAnalytics(ideasForStage);
-                const isClosed = stage.key === 'closed';
-                const isCollapsed = isClosed && closedCollapsed;
-                return (
-                  <KanbanColumn
-                    key={stage.key}
-                    stage={stage}
-                    ideas={ideasForStage}
-                    analytics={analytics}
-                    onCardClick={idea => { handleCardView(idea); }}
-                    droppableId={stage.key}
-                    isClosed={isClosed}
-                    isCollapsed={isCollapsed}
-                    onCollapse={isClosed ? () => setClosedCollapsed(true) : undefined}
-                    onExpand={isClosed ? () => setClosedCollapsed(false) : undefined}
-                  />
-                );
-              })}
-            </div>
-          </DragDropContext>
-          {/* All other modals and overlays remain here, unchanged */}
+            {LIFECYCLE_STAGES.map((stage, colIdx) => {
+              const ideasForStage = kanbanIdeasByStage[stage.key as Stage].map(normalizeIdea);
+              const analytics = getStageAnalytics(ideasForStage);
+              const isClosed = stage.key === 'closed';
+              const isCollapsed = isClosed && closedCollapsed;
+              return (
+                <KanbanColumn
+                  key={stage.key}
+                  stage={stage}
+                  ideas={ideasForStage}
+                  analytics={analytics}
+                  onCardClick={idea => { handleCardView(idea); }}
+                  droppableId={stage.key}
+                  isClosed={isClosed}
+                  isCollapsed={isCollapsed}
+                  onCollapse={isClosed ? () => setClosedCollapsed(true) : undefined}
+                  onExpand={isClosed ? () => setClosedCollapsed(false) : undefined}
+                />
+              );
+            })}
+          </div>
+        </DragDropContext>
+        
+        {/* All other modals and overlays */}
           <Dialog open={showIterationStepper} onOpenChange={setShowIterationStepper}>
             <DialogContent className="max-w-2xl">
               {/* Add close/cancel button to Stepper dialog */}
@@ -1162,6 +1164,6 @@ export function IdeaWorkspace({
             </Alert>
           )}
         </main>
-      </div>
+    </div>
   );
 }
