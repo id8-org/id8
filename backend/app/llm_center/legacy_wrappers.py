@@ -9,7 +9,7 @@ import asyncio
 from typing import Dict, Any, List, Optional
 from app.llm_center import LLMCenter, PromptType, ProcessingContext
 from app.llm_center.parsers import ResponseParser
-from app.schemas import DeepDiveIdeaData, IteratingIdeaData, ConsideringIdeaData
+from app.types import DeepDiveIdeaData, IteratingIdeaData, ConsideringIdeaData
 
 
 # Initialize the LLM center

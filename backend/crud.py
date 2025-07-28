@@ -3,7 +3,7 @@ from app.models import Repo, Idea, Shortlist, DeepDiveVersion, IdeaCollaborator,
 import logging
 from app.services.event_bus import EventBus
 import json
-from app.schemas import IdeaOut
+from app.types import IdeaOut
 import os
 from datetime import datetime
 from typing import Optional

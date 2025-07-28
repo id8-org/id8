@@ -8,14 +8,14 @@ import re
 
 from app.db import get_db
 from app.auth import get_current_active_user
-from app.schemas import UserResume
+from app.types import UserResume
 from app.models import User as UserModel, UserResume as UserResumeModel
-from app.utilities import extract_text_from_resume
+from app.utils.business_utils import extract_text_from_resume
 from app.llm_center import LLMCenter, PromptType, ProcessingContext
 from app.tiers import get_tier_config, get_account_type_config
-from app.json_repair_util import extract_json_from_llm_response
+from app.utils.json_repair_util import extract_json_from_llm_response
 
-router = APIRouter(prefix="/resume", tags=["resume"])
+router = APIRouter(tags=["resume"])
 
 # Ensure upload directory exists
 UPLOAD_DIR = "uploads/resumes"

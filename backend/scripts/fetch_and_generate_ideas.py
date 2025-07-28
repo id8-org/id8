@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from app.db import SessionLocal
 from app.services.github import fetch_trending
-from app.utilities import save_repos
+from app.utils.business_utils import save_repos
 from app.models import Repo, Idea, User, Notification
 from app.services.github_oauth import fetch_user_starred_repos, fetch_user_contributed_repos
 from app.llm import generate_idea_pitches

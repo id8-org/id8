@@ -3,10 +3,10 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.auth import get_current_active_user
 from app.models import Notification, User
-from app.schemas import NotificationOut
+from app.types import NotificationOut
 from typing import List
 
-router = APIRouter(prefix="/api/notifications", tags=["notifications"])
+router = APIRouter(tags=["notifications"])
 
 @router.get("/", response_model=List[NotificationOut])
 async def list_notifications(current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):

@@ -13,7 +13,7 @@ from app.auth import (
     get_current_active_user,
     ACCESS_TOKEN_EXPIRE_MINUTES
 )
-from app.schemas import (
+from app.types import (
     UserRegister, 
     Token, 
     User, 
@@ -36,13 +36,13 @@ from app.google_auth import authenticate_google_user, authenticate_google_user_w
 import logging
 from app.tiers import get_tier_config, get_account_type_config
 from app.services.idea_service import seed_user_idea_if_needed, ask_llm_with_context
-from app.context_utils import context_profile
+from app.utils.context_utils import context_profile
 # Removed import of generate_profile_qna from app.llm (no longer exists)
 from app.services.github_oauth import get_github_access_token, get_github_user_info
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/auth", tags=["authentication"])
+router = APIRouter(tags=["authentication"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")

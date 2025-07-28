@@ -3,12 +3,11 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text, inspect
 from app.db import SessionLocal, Base, engine
-from app.routers import repos, ideas as app_ideas, auth, resume, advanced_features, collaboration, audit, iteration as iteration_router, llm as llm_router
-from app.routers.legacy import router as legacy_router
+from app.routers import repos, ideas as app_ideas, auth, resume, advanced_features, collaboration, audit, iteration as iteration_router, llm as llm_router, notifications
 from logging_config import setup_logging
 from error_handlers import setup_error_handlers
 from app.services.idea_service import seed_system_ideas_if_needed
-from app.routers.advanced_features import router as deep_dive_router
+
 # from app.websocket_manager import ws_manager  # Remove
 # from app.llm_orchestration import call_llm_and_broadcast  # Remove
 import logging
@@ -51,20 +50,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(auth.router)
-app.include_router(resume.router)
-app.include_router(repos.router)
+# Include routers with consistent /api/ prefix
+app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
+app.include_router(resume.router, prefix="/api/resume", tags=["resume"])
+app.include_router(repos.router, prefix="/api/repos", tags=["repos"])
 app.include_router(app_ideas.router, prefix="/api/ideas", tags=["ideas"])
-app.include_router(legacy_router)
-app.include_router(advanced_features.router)
-app.include_router(collaboration.router)
-app.include_router(audit.router, prefix="/audit", tags=["Audit"])
-app.include_router(lifecycle_map_router)
-# app.include_router(prompts_router.router)
-app.include_router(iteration_router.router)
-app.include_router(llm_router.router)
-app.include_router(deep_dive_router)
+app.include_router(advanced_features.router, prefix="/api/advanced", tags=["advanced"])
+app.include_router(collaboration.router, prefix="/api/collaboration", tags=["collaboration"])
+app.include_router(notifications.router, prefix="/api/notifications", tags=["notifications"])
+app.include_router(audit.router, prefix="/api/audit", tags=["audit"])
+app.include_router(iteration_router.router, prefix="/api/iterating", tags=["iterating"])
+app.include_router(llm_router.router, prefix="/api/llm", tags=["llm"])
+app.include_router(lifecycle_map_router, prefix="/api/lifecycle", tags=["lifecycle"])
+# Removed legacy router - endpoints were experimental and unused
 # app.include_router(websocket.router, tags=["websocket"])  # Remove
 
 db_ready = False

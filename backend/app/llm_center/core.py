@@ -4,7 +4,7 @@ import logging
 from typing import Dict, Any, Optional, List
 from sqlmodel import Session
 
-from .types import (
+from ..types.llm_types import (
     LLMRequest, LLMResponse, ParsedResponse, 
     PromptType, LLMProvider, ProcessingContext
 )

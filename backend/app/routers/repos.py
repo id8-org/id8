@@ -5,15 +5,15 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.db import get_db
 from app.models import Repo
-from app.schemas import RepoOut
+from app.types import RepoOut
 from app.services.github import github_service, refresh_trending_repos, clear_repo_cache
-from app.utilities import save_repos
+from app.utils.business_utils import save_repos
 import logging
 
 # Set up logging
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/repos", tags=["repos"])
+router = APIRouter(tags=["repos"])
 
 
 @router.get("/", response_model=List[RepoOut])

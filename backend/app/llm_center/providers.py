@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional
 from datetime import datetime
 
-from .types import LLMRequest, LLMResponse, LLMProvider
+from ..types.llm_types import LLMRequest, LLMResponse, LLMProvider
 from .config import ProviderConfig
 
 
