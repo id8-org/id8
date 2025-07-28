@@ -8,7 +8,7 @@ from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 from ..db import get_db
 from ..auth import get_current_user
-from ..schemas import AuditLogCreate, AuditLogOut
+from app.types import AuditLogCreate, AuditLogOut
 from ..models import User, AuditLog
 from app.utils.business_utils import get_client_ip, get_user_agent
 

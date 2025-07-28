@@ -5,7 +5,7 @@ import logging
 
 from ..db import get_db
 from ..auth import get_current_user
-from .. import schemas
+from app import types as schemas
 from app.models import User, Idea, IdeaCollaborator
 import crud
 from app.tiers import get_tier_config, get_account_type_config
