@@ -7,7 +7,7 @@ try:
 except ImportError:
     redis = None
 import threading
-from app.llm import generate_deep_dive, generate_idea_pitches, sanitize_idea_fields
+from app.llm_center.legacy_wrappers import generate_deep_dive, generate_idea_pitches, sanitize_idea_fields
 from app.services.github import fetch_trending
 from app.context_utils import build_user_context
 import asyncio

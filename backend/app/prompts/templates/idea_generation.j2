@@ -1,0 +1,30 @@
+Generate high-quality startup ideas based on the following request:
+
+{{ content }}
+
+{% if context and context.additional_context %}
+Additional Context:
+{% for key, value in context.additional_context.items() %}
+- {{ key }}: {{ value }}
+{% endfor %}
+{% endif %}
+
+Return a JSON array of 1–3 startup ideas, where each object includes:
+- title: Clear, descriptive name
+- hook: Compelling one-liner 
+- elevator_pitch: 2-3 sentence description
+- problem_statement: Specific problem being solved
+- evidence: Market validation data
+- evidence_reference: {"stat": "actual statistic", "url": "real URL"}
+- differentiator: Unique competitive advantage
+- type: "side_hustle" or "fulltime"
+- score: Overall viability (1-10)
+- mvp_effort: Development effort required (1-10)
+- assumptions: List of key assumptions
+- core_assumptions: Most critical assumptions
+- riskiest_assumptions: What could break this idea
+- repo_usage: Related GitHub repository or ""
+- generation_notes: Analysis and inspiration
+- scope_commitment: MVP scope definition
+
+Focus on real, actionable business opportunities with genuine market demand.

@@ -5,7 +5,7 @@ from app.models import Idea, Iterating
 from app.schemas import IteratingExperiment
 from app.db import get_db
 import uuid
-from app.llm import generate_iteration_experiment_pydanticai
+from app.llm_center.legacy_wrappers import generate_iteration_experiment_pydanticai
 from datetime import datetime
 
 router = APIRouter(prefix="/iterating", tags=["iterating"])

@@ -1,3 +1,16 @@
+"""
+DEPRECATED: This module is deprecated and will be removed in a future version.
+
+All LLM functionality has been moved to app.llm_center for better organization.
+Use the centralized LLM center instead:
+
+from app.llm_center import LLMCenter
+from app.llm_center.legacy_wrappers import call_groq, generate_idea_pitches, etc.
+
+This module now provides backward compatibility by importing from the new centralized system.
+"""
+
+import warnings
 import os
 import httpx
 import json
@@ -13,6 +26,16 @@ from app.json_repair_util import repair_json_with_py, extract_json_from_llm_resp
 from app.context_utils import context_idea, context_user
 from app.utils.prompt_loader import load_prompt
 from pydantic_ai.agent import Agent
+
+# Backward compatibility imports - DEPRECATED
+from app.llm_center.legacy_wrappers import *
+
+# Issue deprecation warning
+warnings.warn(
+    "app.llm module is deprecated. Use app.llm_center instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 # --- Robust .env loading for local/dev ---
 try:

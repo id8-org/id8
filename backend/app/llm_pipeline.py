@@ -1,6 +1,6 @@
 import logging
 from typing import Dict, Any
-from app.llm import robust_extract_json, sanitize_idea_fields
+from app.llm_center.legacy_wrappers import robust_extract_json, sanitize_idea_fields
 from app.llm_guardrails import validate_llm_output
 from app.db import get_db
 from app.models import LLMInputLog, LLMProcessingLog
