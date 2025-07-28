@@ -11,7 +11,7 @@ from app.auth import get_current_active_user
 from app.schemas import UserResume
 from app.models import User as UserModel, UserResume as UserResumeModel
 from app.utilities import extract_text_from_resume
-from app.llm import call_groq
+from app.llm_center import LLMCenter, PromptType, ProcessingContext
 from app.tiers import get_tier_config, get_account_type_config
 from app.json_repair_util import extract_json_from_llm_response
 
@@ -183,8 +183,17 @@ async def process_resume(
     Respond in JSON with keys: first_name, last_name, location, background, skills, education.
     """
     try:
-        llm_response = None
-        llm_response = await call_groq(prompt)
+        # Use centralized LLM center
+        llm_center = LLMCenter()
+        context = ProcessingContext(user_id=str(current_user.id))
+        
+        response = await llm_center.call_llm(
+            prompt_type=PromptType.RESUME_PROCESSING,
+            content=prompt,
+            context=context
+        )
+        
+        llm_response = response.content
         if not isinstance(llm_response, str):
             raise ValueError("LLM response is not a string")
         # Use the robust utility to extract JSON
