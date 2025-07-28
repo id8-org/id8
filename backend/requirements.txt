@@ -28,7 +28,6 @@ tenacity
 guardrails-ai
 pydantic[email]
 dirtyjson
-pydantic-ai[full]
 fastapi
 starlette
 greenlet

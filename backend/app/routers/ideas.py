@@ -4,7 +4,7 @@ from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Body, Header, Request, status
 from fastapi.responses import JSONResponse, HTMLResponse
 from sqlalchemy.orm import Session
-from app.llm_center.legacy_wrappers import generate_deep_dive, generate_idea_pitches, orchestrate_iterating, orchestrate_considering, clean_text_with_llm, render_prompt, call_groq, analyze_version_impact, validate_idea_dict, is_unique_differentiator, is_specific_problem_statement, is_real_actionable_cta, is_real_repo_url, is_compelling_pitch, generate_deep_dive_pydanticai, generate_iterating_pydanticai, generate_considering_pydanticai
+from app.llm_center.legacy_wrappers import generate_deep_dive, generate_idea_pitches, orchestrate_iterating, orchestrate_considering, clean_text_with_llm, render_prompt, call_groq, analyze_version_impact, validate_idea_dict, is_unique_differentiator, is_specific_problem_statement, is_real_actionable_cta, is_real_repo_url, is_compelling_pitch
 from app.services.idea_service import ask_llm_with_context
 from app.db import get_db
 from app.auth import get_current_active_user
@@ -912,7 +912,7 @@ async def generate_deep_dive_for_idea(
             )
             logger.info(f"[API] Generating deep dive for idea {idea_id} with context keys: {list(context.keys())}")
             # --- Use PydanticAI-based Deep Dive ---
-            result = await generate_deep_dive_pydanticai(context)
+            result = await generate_deep_dive(context)
             if result is None:
                 logger.error(f"[API] Deep dive generation returned None for idea {idea_id}")
                 error_content = {
@@ -1277,7 +1277,7 @@ async def iterate_idea(id: str, request: Request, db: Session = Depends(get_db),
         context_update
     )
     # Call PydanticAI orchestration for iterating
-    results = await generate_iterating_pydanticai(context)
+    results = await orchestrate_iterating(context)
     # Persist results as a new version or update the idea as appropriate
     # (existing logic for LensInsight, VCThesisComparison, InvestorDeck, etc.)
     investor_lens = LensInsight(idea_id=idea.id, lens_type="investor", **results.get("investor_lens", {}))
@@ -1317,7 +1317,7 @@ async def consider_idea(id: str, request: Request, db: Session = Depends(get_db)
         context_update
     )
     # Call PydanticAI orchestration for considering
-    results = await generate_considering_pydanticai(context)
+    results = await orchestrate_considering(context)
     # Persist results as appropriate
     investor_lens = LensInsight(idea_id=idea.id, lens_type="investor", **results.get("investor_lens", {}))
     db.add(investor_lens)

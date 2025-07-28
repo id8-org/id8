@@ -20,6 +20,7 @@ class PromptType(str, Enum):
     ITERATING = "iterating"
     CONSIDERING = "considering"
     BUILDING = "building"
+    CLOSED = "closed"
     RESUME_PROCESSING = "resume_processing"
     GENERAL_LLM = "general_llm"
     PITCH_GENERATION = "pitch_generation"

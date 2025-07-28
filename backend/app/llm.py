@@ -24,11 +24,7 @@ from jinja2 import Template
 from app.types import DeepDiveIdeaData, IteratingIdeaData, ConsideringIdeaData, DeepDiveCategoryData, IteratingExperiment
 from app.utils.json_repair_util import repair_json_with_py, extract_json_from_llm_response
 from app.utils.context_utils import context_idea, context_user
-from app.utils.prompt_loader import load_prompt
-try:
-    from pydantic_ai.agent import Agent
-except ImportError:
-    Agent = None  # Graceful fallback if pydantic-ai is not available
+
 
 # Backward compatibility imports - DEPRECATED
 from app.llm_center.legacy_wrappers import *
