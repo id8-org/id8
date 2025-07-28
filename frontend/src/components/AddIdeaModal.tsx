@@ -160,32 +160,53 @@ export const AddIdeaModal = ({ isOpen, onClose, onIdeaCreated, refreshIdeas }: A
     }
     setLoading(true);
     try {
-      // Clean userIdea: remove empty strings for optional fields
-      const cleanedIdea = Object.fromEntries(
-        Object.entries({ ...userIdea, status: 'deep_dive' })
-          .filter(([_, v]) => v !== "")
-      );
-      const res = await api.post('/ideas/validate', {
-        idea_data: cleanedIdea,
+      // Use the same generate endpoint as AI-suggested ideas, but with BYOI context
+      // This ensures both flows use the same backend logic
+      const res = await api.post('/api/ideas/generate', {
+        industry: '', // Let the AI infer from context
+        business_model: '',
+        vertical: '',
+        horizontal: '',
+        context: `User provided idea: Title: ${userIdea.title}. Hook: ${userIdea.hook || 'Not provided'}. Value: ${userIdea.value || 'Not provided'}. Evidence: ${userIdea.evidence || 'Not provided'}. Differentiator: ${userIdea.differentiator || 'Not provided'}. Call to Action: ${userIdea.call_to_action || 'Not provided'}.`,
         use_personalization: usePersonalization,
-        flow_type: 'byoi', // Specify BYOI flow
+        flow_type: 'byoi',
+        user_idea_data: {
+          title: userIdea.title,
+          hook: userIdea.hook || '',
+          value: userIdea.value || '',
+          evidence: userIdea.evidence || '',
+          differentiator: userIdea.differentiator || '',
+          call_to_action: userIdea.call_to_action || '',
+          source_type: 'byoi',
+          status: 'deep_dive',
+          problem_statement: userIdea.hook || '', // Use hook as problem statement if available
+          elevator_pitch: `${userIdea.title}: ${userIdea.value || userIdea.hook || ''}`,
+        },
       });
-      const newIdea = res.data?.idea || res.data;
-      // Immediately add to board and close modal
-      onIdeaCreated(newIdea?.id);
-      if (refreshIdeas) refreshIdeas();
-      toast({
-        title: "Idea Added!",
-        description: "Your idea has been added to the board."
-      });
+      
+      const newIdeas = res.data?.ideas || [];
+      if (newIdeas.length > 0) {
+        const newIdea = newIdeas[0]; // Use the first generated/processed idea
+        onIdeaCreated(newIdea?.id);
+        if (refreshIdeas) refreshIdeas();
+        toast({
+          title: "Idea Added!",
+          description: "Your idea has been processed and added to the board."
+        });
+      } else {
+        toast({
+          title: "Processing Failed",
+          description: "Could not process your idea. Please try again.",
+          variant: "destructive"
+        });
+      }
       onClose();
-      // Optionally, show review modal if you want a second step
-      // setReviewIdea(newIdea);
-      // setTimeout(() => setShowReviewModal(true), 200);
     } catch (error) {
+      console.error('BYOI Error:', error);
       toast({
         title: "Creation Failed",
         description: "Could not save your idea. Please try again.",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
