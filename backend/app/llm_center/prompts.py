@@ -65,6 +65,7 @@ class PromptManager:
             PromptType.ITERATING: "iterating.j2",
             PromptType.CONSIDERING: "considering.j2",
             PromptType.BUILDING: "building.j2",
+            PromptType.CLOSED: "closed.j2",
             PromptType.RESUME_PROCESSING: "resume_processing.j2",
             PromptType.PITCH_GENERATION: "pitch_generation.j2",
             PromptType.PERSONALIZED_IDEAS: "personalized_ideas.j2",

@@ -206,22 +206,6 @@ def is_compelling_pitch(pitch: str) -> bool:
     return len(pitch) > 50 and len(pitch.split()) > 10
 
 
-# Pydantic AI wrappers - these would need proper implementation
-async def generate_deep_dive_pydanticai(*args, **kwargs):
-    """Placeholder for pydantic-ai deep dive generation"""
-    return await generate_deep_dive(*args, **kwargs)
-
-
-async def generate_iterating_pydanticai(*args, **kwargs):
-    """Placeholder for pydantic-ai iterating generation"""
-    return await orchestrate_iterating(*args, **kwargs)
-
-
-async def generate_considering_pydanticai(*args, **kwargs):
-    """Placeholder for pydantic-ai considering generation"""
-    return await orchestrate_considering(*args, **kwargs)
-
-
 def sanitize_idea_fields(idea: Dict[str, Any]) -> Dict[str, Any]:
     """
     Legacy wrapper for idea field sanitization
@@ -261,8 +245,8 @@ async def generate_investor_deck(*args, **kwargs):
     return await call_groq(prompt)
 
 
-async def generate_iteration_experiment_pydanticai(*args, **kwargs):
-    """Placeholder for iteration experiment generation"""
+async def generate_iteration_experiment(*args, **kwargs):
+    """Generate iteration experiment using DSPy"""
     prompt = "Generate iteration experiment based on the provided parameters"
     return await call_groq(prompt)
 

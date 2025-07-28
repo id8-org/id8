@@ -17,12 +17,6 @@ RUN pip install --upgrade pip
 # Install Python dependencies with increased timeout
 RUN pip install --default-timeout=120 --no-cache-dir -r /app/requirements.txt
 
-# Ensure pydantic-ai agent is installed from GitHub (not PyPI)
-RUN pip uninstall -y pydantic-ai pydantic-ai-slim pydantic-evals pydantic-graph && \
-    pip install "pydantic-ai[full]"
-
-# Install pydantic-ai[full] package
-
 # Copy the rest of your backend code
 COPY . /app
 

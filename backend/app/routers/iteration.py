@@ -5,7 +5,7 @@ from app.models import Idea, Iterating
 from app.types import IteratingExperiment
 from app.db import get_db
 import uuid
-from app.llm_center.legacy_wrappers import generate_iteration_experiment_pydanticai
+from app.llm_center.legacy_wrappers import generate_iteration_experiment
 from datetime import datetime
 
 router = APIRouter(tags=["iterating"])
@@ -31,7 +31,7 @@ async def propose_experiment(
         "assumptions": assumptions,
         "prior_logs": prior_logs_data,
     }
-    result = await generate_iteration_experiment_pydanticai(context)
+    result = await generate_iteration_experiment(context)
     if not result or not result.get("experiment"):
         raise HTTPException(status_code=500, detail="Failed to generate experiment proposal")
     return result["experiment"]
