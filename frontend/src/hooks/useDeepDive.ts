@@ -1,5 +1,11 @@
 import { useState, useCallback } from 'react';
-import * as deepDiveApi from '@/lib/api/deepDiveApi';
+import { 
+  getDeepDiveById, 
+  getDeepDiveByIdeaId, 
+  createDeepDive, 
+  updateDeepDive, 
+  deleteDeepDive 
+} from '@/lib/api';
 import { DeepDive, DeepDiveCreate } from '@/types/deepDive';
 
 export function useDeepDive(ideaId?: string) {
@@ -12,7 +18,7 @@ export function useDeepDive(ideaId?: string) {
     setLoading(true);
     setError(null);
     try {
-      const response = await deepDiveApi.getDeepDiveByIdeaId(ideaId);
+      const response = await getDeepDiveByIdeaId(ideaId);
       setDeepDive(response.data);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch deep dive');
@@ -25,7 +31,7 @@ export function useDeepDive(ideaId?: string) {
     setLoading(true);
     setError(null);
     try {
-      const response = await deepDiveApi.createDeepDive(data);
+      const response = await createDeepDive(data);
       setDeepDive(response.data);
       return response.data;
     } catch (err: any) {
@@ -40,7 +46,7 @@ export function useDeepDive(ideaId?: string) {
     setLoading(true);
     setError(null);
     try {
-      const response = await deepDiveApi.updateDeepDive(id, data);
+      const response = await updateDeepDive(id, data);
       setDeepDive(response.data);
       return response.data;
     } catch (err: any) {
@@ -55,7 +61,7 @@ export function useDeepDive(ideaId?: string) {
     setLoading(true);
     setError(null);
     try {
-      await deepDiveApi.deleteDeepDive(id);
+      await deleteDeepDive(id);
       setDeepDive(null);
     } catch (err: any) {
       setError(err.message || 'Failed to delete deep dive');

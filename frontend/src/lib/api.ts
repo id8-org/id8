@@ -1228,4 +1228,65 @@ export function safeArray(val: any) {
 export const getIdeasByStatus = async (status: string): Promise<Idea[]> => {
   const response = await api.get(`/api/ideas/list${status ? `?status=${status}` : ''}`);
   return Array.isArray(response.data.ideas) ? response.data.ideas.map(normalizeIdea) : [];
-}; 
+};
+
+// Stage-specific API functions (consolidated from separate files)
+// Import stage types to avoid duplication
+import type { 
+  Suggested, 
+  SuggestedCreate, 
+  DeepDive, 
+  DeepDiveCreate, 
+  Iterating, 
+  IteratingCreate, 
+  Considering, 
+  ConsideringCreate 
+} from '@/types/api';
+
+// Suggested stage API
+export const createSuggested = (data: SuggestedCreate) =>
+  api.post<Suggested>('/advanced/suggested/', data);
+
+export const getSuggestedById = (id: string) =>
+  api.get<Suggested>(`/advanced/suggested/${id}`);
+
+export const getSuggestedByIdeaId = (ideaId: string) =>
+  api.get<Suggested>(`/advanced/suggested/idea/${ideaId}`);
+
+export const updateSuggested = (id: string, data: SuggestedCreate) =>
+  api.put<Suggested>(`/advanced/suggested/${id}`, data);
+
+export const deleteSuggested = (id: string) =>
+  api.delete(`/advanced/suggested/${id}`);
+
+// Deep Dive stage API
+export const createDeepDive = (data: DeepDiveCreate) =>
+  api.post<DeepDive>('/deep-dive/', data);
+
+export const getDeepDiveById = (id: string) =>
+  api.get<DeepDive>(`/deep-dive/${id}`);
+
+export const getDeepDiveByIdeaId = (ideaId: string) =>
+  api.get<DeepDive>(`/deep-dive/idea/${ideaId}`);
+
+export const updateDeepDive = (id: string, data: DeepDiveCreate) =>
+  api.put<DeepDive>(`/deep-dive/${id}`, data);
+
+export const deleteDeepDive = (id: string) =>
+  api.delete(`/deep-dive/${id}`);
+
+// Iterating stage API
+export const createIterating = (data: IteratingCreate) =>
+  api.post<Iterating>('/advanced/iterating/', data);
+
+export const getIteratingById = (id: string) =>
+  api.get<Iterating>(`/advanced/iterating/${id}`);
+
+export const getIteratingByIdeaId = (ideaId: string) =>
+  api.get<Iterating>(`/advanced/iterating/idea/${ideaId}`);
+
+export const updateIterating = (id: string, data: IteratingCreate) =>
+  api.put<Iterating>(`/advanced/iterating/${id}`, data);
+
+export const deleteIterating = (id: string) =>
+  api.delete(`/advanced/iterating/${id}`); 

@@ -1,5 +1,11 @@
 import { useState, useCallback } from 'react';
-import * as suggestedApi from '@/lib/api/suggestedApi';
+import { 
+  getSuggestedById, 
+  getSuggestedByIdeaId, 
+  createSuggested, 
+  updateSuggested, 
+  deleteSuggested 
+} from '@/lib/api';
 import { Suggested, SuggestedCreate } from '@/types/suggested';
 
 export function useSuggested(ideaId?: string) {
@@ -12,7 +18,7 @@ export function useSuggested(ideaId?: string) {
     setLoading(true);
     setError(null);
     try {
-      const response = await suggestedApi.getSuggestedByIdeaId(ideaId);
+      const response = await getSuggestedByIdeaId(ideaId);
       setSuggested(response.data);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch suggested');
@@ -25,7 +31,7 @@ export function useSuggested(ideaId?: string) {
     setLoading(true);
     setError(null);
     try {
-      const response = await suggestedApi.createSuggested(data);
+      const response = await createSuggested(data);
       setSuggested(response.data);
       return response.data;
     } catch (err: any) {
@@ -40,7 +46,7 @@ export function useSuggested(ideaId?: string) {
     setLoading(true);
     setError(null);
     try {
-      const response = await suggestedApi.updateSuggested(id, data);
+      const response = await updateSuggested(id, data);
       setSuggested(response.data);
       return response.data;
     } catch (err: any) {
@@ -55,7 +61,7 @@ export function useSuggested(ideaId?: string) {
     setLoading(true);
     setError(null);
     try {
-      await suggestedApi.deleteSuggested(id);
+      await deleteSuggested(id);
       setSuggested(null);
     } catch (err: any) {
       setError(err.message || 'Failed to delete suggested');
