@@ -742,6 +742,16 @@ class LLMInputLog(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     processing_logs = relationship('LLMProcessingLog', back_populates='input_log')
 
+    def as_dict(self):
+        result = {}
+        for c in inspect(self).mapper.column_attrs:
+            value = getattr(self, c.key)
+            if hasattr(value, 'isoformat'):
+                result[c.key] = value.isoformat()
+            else:
+                result[c.key] = value
+        return result
+
 class LLMProcessingLog(Base):
     __tablename__ = 'llm_processing_log'
     id = Column(Integer, primary_key=True, index=True)
@@ -751,3 +761,13 @@ class LLMProcessingLog(Base):
     raw_output = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
     input_log = relationship('LLMInputLog', back_populates='processing_logs')
+
+    def as_dict(self):
+        result = {}
+        for c in inspect(self).mapper.column_attrs:
+            value = getattr(self, c.key)
+            if hasattr(value, 'isoformat'):
+                result[c.key] = value.isoformat()
+            else:
+                result[c.key] = value
+        return result
