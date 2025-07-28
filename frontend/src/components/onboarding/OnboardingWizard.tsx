@@ -85,7 +85,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
     accountType: 'solo',
     teamInvites: [] as string[],
     _inviteInput: '',
-    education: [] as any[],
+    education: [] as Array<{ degree: string; institution: string }>,
     education_string: '',
     businessModels: [] as string[],
     // New comprehensive profile fields
@@ -358,7 +358,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
         <div className="col-span-2 space-y-1">
           <Label className="text-xs">Education</Label>
           <div className="flex flex-col gap-2">
-            {(Array.isArray(formData.education) ? formData.education : []).map((edu: any, idx: number) => (
+            {(Array.isArray(formData.education) ? formData.education : []).map((edu: { degree: string; institution: string }, idx: number) => (
               <div key={idx} className="flex gap-2 items-center">
                 <Input
                   className="text-xs flex-1"
@@ -863,7 +863,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
     }
   };
 
-  const handleStepSubmit = async (step: number, data: any) => {
+  const handleStepSubmit = async (step: number, data: Record<string, unknown>) => {
     try {
       setIsLoading(true);
       let updateData = { ...formData, ...data };
