@@ -474,6 +474,38 @@ async def generate_ideas(
         )
         # --- Log the full LLM payload for auditing ---
         logger.info(f"[LLM PAYLOAD] Full context sent to LLM for idea generation: {json.dumps(context, indent=2, default=str)[:4000]}")
+        
+        # Handle BYOI (Bring Your Own Idea) flow
+        if request.flow_type == 'byoi' and request.user_idea_data:
+            logger.info(f"[BYOI] Processing user-provided idea: {request.user_idea_data}")
+            try:
+                # Clean and validate user idea data
+                user_idea = ensure_idea_fields(request.user_idea_data)
+                
+                # Create idea directly from user input
+                db_idea = create_idea_from_dict(user_idea, str(current_user.id))
+                db.add(db_idea)
+                db.commit()
+                db.refresh(db_idea)
+                
+                logger.info(f"[BYOI] Created idea '{db_idea.title}' (ID: {db_idea.id})")
+                log_and_emit_audit(db, current_user.id, 'idea_created', 'idea', db_idea.id, db_idea.as_dict())
+                
+                # Return the created idea in the expected format
+                idea_dict = db_idea.as_dict()
+                filtered_idea = {k: v for k, v in idea_dict.items() if k in SUGGESTED_FIELDS and v not in (None, '', [], {})}
+                
+                return {
+                    "ideas": [filtered_idea],
+                    "config": config,
+                    "matched_repo": None,
+                    "idea_warnings": []
+                }
+            except Exception as e:
+                logger.error(f"[BYOI] Error processing user idea: {e}\n{traceback.format_exc()}")
+                raise HTTPException(status_code=500, detail=f"Failed to process your idea: {str(e)}")
+        
+        # Continue with existing AI generation logic
         if request.use_personalization and str(current_user.id) != "api_user":
             try:
                 context_str = json.dumps(context)

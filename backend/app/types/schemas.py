@@ -424,11 +424,17 @@ class IdeaGenerationRequest(BaseModel):
     vertical: Optional[str] = None
     horizontal: Optional[str] = None
     user_context: Optional[str] = None
-    flow_type: str # Required, must be one of 'ai', 'byoi', 'repo'
+    flow_type: str # Required, must be one of 'ai', 'byoi', 'repo', 'onboarding_completion'
+    user_idea_data: Optional[Dict[str, Any]] = None  # For BYOI flow
 
     @model_validator(mode="before")
     @classmethod
     def at_least_two_fields_required(cls, values):
+        # For BYOI flow, we only need user_idea_data
+        if values.get('flow_type') == 'byoi' and values.get('user_idea_data'):
+            return values
+        
+        # For other flows, require at least two fields
         fields = [values.get('industry'), values.get('business_model'), values.get('vertical'), values.get('horizontal')]
         non_empty = [f for f in fields if f and isinstance(f, str) and f.strip()]
         if len(non_empty) < 2:

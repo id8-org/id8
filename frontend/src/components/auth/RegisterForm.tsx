@@ -10,6 +10,7 @@ import { useGoogleAuth } from '@/hooks/useGoogleAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import AuthLayout from './AuthLayout';
+import heroImage from '../../assets/hero.png';
 
 const registerSchema = z.object({
   first_name: z.string().min(1, 'First name is required'),
@@ -44,6 +45,26 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
+
+  const handleGoogleSignUp = async () => {
+    setIsLoading(true);
+    try {
+      await signInWithGoogle();
+      toast({
+        title: 'Success',
+        description: 'Google sign-up successful!',
+      });
+    } catch (error) {
+      console.error('Google sign-up error:', error);
+      toast({
+        title: 'Google Sign-up Failed',
+        description: error instanceof Error ? error.message : 'Google sign-up failed',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
@@ -106,7 +127,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
   };
 
   return (
-    <AuthLayout heroImageSrc="/path/to/hero-image.jpg">
+    <AuthLayout heroImageSrc={heroImage}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <h2>Sign Up</h2>
         <div className="grid grid-cols-2 gap-4">
@@ -219,6 +240,27 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) =
             'Create account'
           )}
         </Button>
+
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleGoogleSignUp}
+          disabled={isLoading}
+          className="w-full"
+        >
+          Sign up with Google
+        </Button>
+
+        <div className="text-sm text-center">
+          Already have an account?{' '}
+          <button
+            type="button"
+            className="underline text-primary"
+            onClick={onSwitchToLogin}
+          >
+            Login
+          </button>
+        </div>
       </form>
     </AuthLayout>
   );
