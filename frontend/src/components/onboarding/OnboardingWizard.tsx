@@ -87,12 +87,21 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
     education: [] as any[],
     education_string: '',
     businessModels: [] as string[],
+    // New comprehensive profile fields
+    goals: [] as string[],
+    timeline: '',
+    experienceYears: '',
+    industries: [] as string[],
+    educationLevel: '',
+    workStyle: '',
+    fundingPreference: '',
+    locationPreference: '',
   });
 
   const { user, updateProfile, config } = useAuth();
   const { toast } = useToast();
 
-  const totalSteps = 8;
+  const totalSteps = 10;
   const progress = (currentStep / totalSteps) * 100;
 
   const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -557,6 +566,182 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
     </div>
   );
 
+  const renderGoalsStep = () => (
+    <div className="space-y-4">
+      <SectionHeader 
+        title="Your Goals" 
+        subtitle="What are your primary goals for starting a business?"
+      />
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="goals">What do you want to achieve? (Select all that apply)</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+            {[
+              'Financial Freedom',
+              'Solve a Problem',
+              'Build Something Meaningful',
+              'Learn New Skills',
+              'Create Jobs',
+              'Make an Impact',
+              'Work for Myself',
+              'Scale a Business'
+            ].map((goal) => (
+              <div key={goal} className="flex items-center space-x-2">
+                <Checkbox
+                  checked={formData.goals?.includes(goal) || false}
+                  onCheckedChange={() => toggleArrayItem('goals', goal)}
+                />
+                <Label className="text-sm">{goal}</Label>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        <div>
+          <Label htmlFor="timeline">What's your timeline for starting?</Label>
+          <Select value={formData.timeline} onValueChange={(value) => handleInputChange('timeline', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select your timeline" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="immediate">Immediately (within 3 months)</SelectItem>
+              <SelectItem value="short_term">Short term (3-6 months)</SelectItem>
+              <SelectItem value="medium_term">Medium term (6-12 months)</SelectItem>
+              <SelectItem value="long_term">Long term (1+ years)</SelectItem>
+              <SelectItem value="exploring">Just exploring for now</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderExperienceStep = () => (
+    <div className="space-y-4">
+      <SectionHeader 
+        title="Your Experience" 
+        subtitle="Tell us about your background and experience"
+      />
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="experience_years">Years of professional experience</Label>
+          <Select value={formData.experienceYears} onValueChange={(value) => handleInputChange('experienceYears', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select years of experience" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="0-1">0-1 years</SelectItem>
+              <SelectItem value="2-3">2-3 years</SelectItem>
+              <SelectItem value="4-6">4-6 years</SelectItem>
+              <SelectItem value="7-10">7-10 years</SelectItem>
+              <SelectItem value="10+">10+ years</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="industries">Industries you've worked in</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+            {[
+              'Technology',
+              'Healthcare',
+              'Finance',
+              'Education',
+              'Retail',
+              'Manufacturing',
+              'Consulting',
+              'Marketing',
+              'Real Estate',
+              'Non-profit',
+              'Government',
+              'Other'
+            ].map((industry) => (
+              <div key={industry} className="flex items-center space-x-2">
+                <Checkbox
+                  checked={formData.industries?.includes(industry) || false}
+                  onCheckedChange={() => toggleArrayItem('industries', industry)}
+                />
+                <Label className="text-sm">{industry}</Label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <Label htmlFor="education">Highest level of education</Label>
+          <Select value={formData.educationLevel} onValueChange={(value) => handleInputChange('educationLevel', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select education level" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="high_school">High School</SelectItem>
+              <SelectItem value="associate">Associate's Degree</SelectItem>
+              <SelectItem value="bachelor">Bachelor's Degree</SelectItem>
+              <SelectItem value="master">Master's Degree</SelectItem>
+              <SelectItem value="phd">PhD</SelectItem>
+              <SelectItem value="self_taught">Self-taught</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderPreferencesStep = () => (
+    <div className="space-y-4">
+      <SectionHeader 
+        title="Your Preferences" 
+        subtitle="Help us understand your working style and preferences"
+      />
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="work_style">Preferred work style</Label>
+          <Select value={formData.workStyle} onValueChange={(value) => handleInputChange('workStyle', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select your work style" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="solo">Solo entrepreneur</SelectItem>
+              <SelectItem value="team">Team collaboration</SelectItem>
+              <SelectItem value="hybrid">Mix of both</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="funding_preference">Funding preference</Label>
+          <Select value={formData.fundingPreference} onValueChange={(value) => handleInputChange('fundingPreference', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select funding preference" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="bootstrap">Bootstrap (self-funded)</SelectItem>
+              <SelectItem value="investors">Seek investors</SelectItem>
+              <SelectItem value="crowdfunding">Crowdfunding</SelectItem>
+              <SelectItem value="grants">Grants</SelectItem>
+              <SelectItem value="undecided">Not sure yet</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="location_preference">Location preference</Label>
+          <Select value={formData.locationPreference} onValueChange={(value) => handleInputChange('locationPreference', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select location preference" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="remote">Fully remote</SelectItem>
+              <SelectItem value="hybrid">Hybrid (remote + office)</SelectItem>
+              <SelectItem value="local">Local/regional focus</SelectItem>
+              <SelectItem value="global">Global from day one</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderBusinessModelsStep = () => (
     <div className="space-y-4">
       <div className="text-base font-semibold mb-1">Which business models are you interested in?</div>
@@ -663,10 +848,13 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
       case 1: return renderAccountTypeStep();
       case 2: return renderStep1();
       case 3: return renderStep2();
-      case 4: return renderBusinessVerticalsStep();
-      case 5: return renderBusinessHorizontalsStep();
-      case 6: return renderBusinessModelsStep();
-      case 7: return renderFinalStep();
+      case 4: return renderGoalsStep();
+      case 5: return renderExperienceStep();
+      case 6: return renderBusinessVerticalsStep();
+      case 7: return renderBusinessHorizontalsStep();
+      case 8: return renderBusinessModelsStep();
+      case 9: return renderPreferencesStep();
+      case 10: return renderFinalStep();
       default: return null;
     }
   };
@@ -708,22 +896,47 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
           break;
         }
         case 4:
+          // Goals step - save goals and timeline
           await api.post('/auth/onboarding/step2', toSnakeCase({
-            skills: formData.skills || [],
-            interests: formData.interests
+            goals: formData.goals || [],
+            timeline: formData.timeline
           }));
           break;
         case 5:
+          // Experience step - save experience, industries, education
           await api.post('/auth/onboarding/step3', toSnakeCase({
-            horizontals: formData.horizontals,
-            interests: formData.interests
+            experience_years: formData.experienceYears,
+            industries: formData.industries || [],
+            education_level: formData.educationLevel
           }));
           break;
         case 6:
-          // Business Models step: optionally POST to backend if needed
-          // await api.post('/auth/onboarding/step_business_models', toSnakeCase({ businessModels: formData.businessModels }));
+          // Business Verticals step
+          await api.post('/auth/onboarding/step4', toSnakeCase({
+            interests: formData.interests
+          }));
           break;
         case 7:
+          // Business Horizontals step
+          await api.post('/auth/onboarding/step5', toSnakeCase({
+            horizontals: formData.horizontals
+          }));
+          break;
+        case 8:
+          // Business Models step
+          await api.post('/auth/onboarding/step6', toSnakeCase({
+            business_models: formData.businessModels
+          }));
+          break;
+        case 9:
+          // Preferences step
+          await api.post('/auth/onboarding/step7', toSnakeCase({
+            work_style: formData.workStyle,
+            funding_preference: formData.fundingPreference,
+            location_preference: formData.locationPreference
+          }));
+          break;
+        case 10:
           if (!privacyChecked || !termsChecked) {
             toast({
               title: "Agreement Required",
@@ -742,7 +955,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
             setIsLoading(false);
             return;
           }
-          // Ensure preferredBusinessModels and verticals are always sent
+          // Complete onboarding with all data
           const payload = {
             ...formData,
             teamInvites: formData.accountType === 'team' ? formData.teamInvites : [],
@@ -780,12 +993,18 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
       case 3:
         return formData.firstName && formData.lastName && formData.location;
       case 4:
-        return formData.interests.length > 0; // at least one vertical selected
-        case 5:
-          return formData.horizontals && formData.horizontals.length > 0;
+        return formData.goals && formData.goals.length > 0 && formData.timeline; // Require goals and timeline
+      case 5:
+        return formData.experienceYears && formData.educationLevel; // Require experience and education
       case 6:
-        return formData.businessModels && formData.businessModels.length > 0; // Require at least one business model
+        return formData.interests.length > 0; // at least one vertical selected
       case 7:
+        return formData.horizontals && formData.horizontals.length > 0;
+      case 8:
+        return formData.businessModels && formData.businessModels.length > 0; // Require at least one business model
+      case 9:
+        return formData.workStyle && formData.fundingPreference && formData.locationPreference; // Require all preferences
+      case 10:
         return (
           !!formData.riskTolerance &&
           !!formData.timeAvailability &&

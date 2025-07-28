@@ -71,6 +71,12 @@ class UserProfile(Base):
     
     # Goals & Preferences
     goals = Column(JSONB, default=list)  # List of goal strings
+    timeline = Column(String)  # 'immediate', 'short_term', 'medium_term', 'long_term', 'exploring'
+    experience_years = Column(String)  # '0-1', '2-3', '4-6', '7-10', '10+'
+    education_level = Column(String)  # 'high_school', 'associate', 'bachelor', 'master', 'phd', 'self_taught'
+    work_style = Column(String)  # 'solo', 'team', 'hybrid'
+    funding_preference = Column(String)  # 'bootstrap', 'investors', 'crowdfunding', 'grants', 'undecided'
+    location_preference = Column(String)  # 'remote', 'hybrid', 'local', 'global'
     preferred_business_models = Column(JSONB, default=list)
     preferred_industries = Column(JSONB, default=list)
     risk_tolerance = Column(String)  # 'low', 'medium', 'high'

@@ -6,7 +6,7 @@ from database import sync_engine, Base
 def create_database_if_not_exists():
     """Create the database if it doesn't exist"""
     # Parse the DATABASE_URL to get connection details
-    database_url = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@db:5432/app")
+    database_url = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@db:5432/ideas")
     
     # Extract components from the URL
     if database_url.startswith("postgresql://"):

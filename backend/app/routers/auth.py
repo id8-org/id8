@@ -372,9 +372,40 @@ async def onboarding_step5(
     setattr(profile, 'risk_tolerance', data.risk_tolerance)
     setattr(profile, 'time_availability', data.time_availability)
     setattr(profile, 'onboarding_step', 5)
-    setattr(profile, 'onboarding_completed', True)
     db.commit()
-    return {"message": "Onboarding completed!"}
+    return {"message": "Step 5 completed", "next_step": 6}
+
+@router.post("/onboarding/step6")
+async def onboarding_step6(
+    data: dict, 
+    current_user: UserModel = Depends(get_current_active_user), 
+    db: Session = Depends(get_db)
+):
+    """Complete onboarding step 6: Business Models"""
+    profile = db.query(UserProfileModel).filter(UserProfileModel.user_id == current_user.id).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    setattr(profile, 'preferred_business_models', data.get('business_models', []))
+    setattr(profile, 'onboarding_step', 6)
+    db.commit()
+    return {"message": "Step 6 completed", "next_step": 7}
+
+@router.post("/onboarding/step7")
+async def onboarding_step7(
+    data: dict, 
+    current_user: UserModel = Depends(get_current_active_user), 
+    db: Session = Depends(get_db)
+):
+    """Complete onboarding step 7: Work Preferences"""
+    profile = db.query(UserProfileModel).filter(UserProfileModel.user_id == current_user.id).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    setattr(profile, 'work_style', data.get('work_style'))
+    setattr(profile, 'funding_preference', data.get('funding_preference'))
+    setattr(profile, 'location_preference', data.get('location_preference'))
+    setattr(profile, 'onboarding_step', 7)
+    db.commit()
+    return {"message": "Step 7 completed", "next_step": 8}
 
 @router.post("/onboarding/complete")
 async def onboarding_complete(
@@ -450,14 +481,62 @@ async def onboarding_complete(
 
 
 def is_profile_complete(profile) -> bool:
-    required_fields = [
-        'first_name', 'last_name', 'location', 'skills', 'interests',
-        'preferred_business_models', 'risk_tolerance', 'time_availability'
-    ]
-    for field in required_fields:
+    """Check if user profile is complete with all required fields"""
+    if not profile:
+        return False
+    
+    # Basic personal information
+    basic_fields = ['first_name', 'last_name', 'location', 'background']
+    for field in basic_fields:
         value = getattr(profile, field, None)
-        if value is None or (isinstance(value, list) and not value) or (isinstance(value, str) and not value.strip()):
+        if value is None or (isinstance(value, str) and not value.strip()):
             return False
+    
+    # Skills and interests (must have at least some)
+    skills = getattr(profile, 'skills', [])
+    interests = getattr(profile, 'interests', [])
+    if not skills or not isinstance(skills, list) or len(skills) == 0:
+        return False
+    if not interests or not isinstance(interests, list) or len(interests) == 0:
+        return False
+    
+    # Goals and timeline
+    goals = getattr(profile, 'goals', [])
+    timeline = getattr(profile, 'timeline', None)
+    if not goals or not isinstance(goals, list) or len(goals) == 0:
+        return False
+    if not timeline:
+        return False
+    
+    # Experience and education
+    experience_years = getattr(profile, 'experience_years', None)
+    education_level = getattr(profile, 'education_level', None)
+    if not experience_years or not education_level:
+        return False
+    
+    # Work preferences
+    work_style = getattr(profile, 'work_style', None)
+    funding_preference = getattr(profile, 'funding_preference', None)
+    location_preference = getattr(profile, 'location_preference', None)
+    if not work_style or not funding_preference or not location_preference:
+        return False
+    
+    # Business preferences
+    business_models = getattr(profile, 'preferred_business_models', [])
+    if not business_models or not isinstance(business_models, list) or len(business_models) == 0:
+        return False
+    
+    # Risk tolerance and time availability
+    risk_tolerance = getattr(profile, 'risk_tolerance', None)
+    time_availability = getattr(profile, 'time_availability', None)
+    if not risk_tolerance or not time_availability:
+        return False
+    
+    # Check if onboarding is explicitly marked as completed
+    onboarding_completed = getattr(profile, 'onboarding_completed', False)
+    if not onboarding_completed:
+        return False
+    
     return True
 
 
@@ -474,7 +553,7 @@ async def accept_invite(
             status_code=403,
             detail="Please complete your onboarding profile before accessing this feature"
         )
-    invite = db.query(Invite).filter(Invite.id == invite_id, Invite.revoked == False, Invite.accepted == False).first()
+    invite = db.query(Invite).filter(Invite.id == invite_id, Invite.revoked.is_(False), Invite.accepted.is_(False)).first()
     if not invite:
         raise HTTPException(status_code=404, detail="Invite not found or already used/revoked.")
     if invite.expires_at < datetime.utcnow():
@@ -497,7 +576,7 @@ async def list_team_members(
     if not current_user.team_id:
         return {"members": [], "invites": []}
     members = db.query(UserModel).filter(UserModel.team_id == current_user.team_id).all()
-    invites = db.query(Invite).filter(Invite.team_id == current_user.team_id, Invite.revoked == False, Invite.accepted == False).all()
+    invites = db.query(Invite).filter(Invite.team_id == current_user.team_id, Invite.revoked.is_(False), Invite.accepted.is_(False)).all()
     return {"members": members, "invites": invites}
 
 @router.post("/invite/revoke")
@@ -507,7 +586,7 @@ async def revoke_invite(
     current_user: UserModel = Depends(get_current_active_user)
 ):
     """Revoke a pending invite (owner only)."""
-    invite = db.query(Invite).filter(Invite.id == invite_id, Invite.revoked == False, Invite.accepted == False).first()
+    invite = db.query(Invite).filter(Invite.id == invite_id, Invite.revoked.is_(False), Invite.accepted.is_(False)).first()
     if not invite:
         raise HTTPException(status_code=404, detail="Invite not found or already used/revoked.")
     team = db.query(Team).filter(Team.id == invite.team_id).first()

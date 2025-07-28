@@ -7,14 +7,12 @@ import { RegisterForm } from './components/auth/RegisterForm';
 import { OnboardingWizard } from './components/onboarding/OnboardingWizard';
 import { getAllIdeas, generateIdea } from './lib/api';
 import './App.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Routes, Route, Navigate } from 'react-router-dom';
 import Kanban from './pages/Kanban';
-import { Routes, Route, Navigate } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
 import AskAIWindow from './components/ui/AskAIWindow';
 import { AddIdeaModal } from './components/AddIdeaModal';
 import { ErrorFallback } from './components/ui/error-fallback';
-// TEMP: Import Start page for temporary routing
 import { useIdeas } from './hooks/useIdeas';
 import Layout from './components/Layout';
 import { refreshApiAuthHeader } from './lib/api';
@@ -52,33 +50,108 @@ const queryClient = new QueryClient({
   },
 });
 
-function AppContent() {
+// Protected Route Component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
-  const [addIdeaModalOpen, setAddIdeaModalOpen] = useState(false);
-  const [isLoginMode, setIsLoginMode] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user && user.onboarding_required) {
+    if (!isLoading && user && user.onboarding_required) {
       navigate('/onboarding');
     }
-  }, [user, navigate]);
+  }, [user, isLoading, navigate]);
 
   if (isLoading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
+
   if (!user) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-slate-50">
-        {isLoginMode ? (
-          <LoginForm onSwitchToRegister={() => setIsLoginMode(false)} />
-        ) : (
-          <RegisterForm onSwitchToLogin={() => setIsLoginMode(true)} />
-        )}
-      </div>
-    );
+    return <Navigate to="/auth" replace />;
   }
-  // Render Kanban board inside Layout with sidebar and header
+
+  if (user.onboarding_required) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+// Auth Route Component
+const AuthRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      if (user.onboarding_required) {
+        navigate('/onboarding');
+      } else {
+        navigate('/dashboard');
+      }
+    }
+  }, [user, isLoading, navigate]);
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
+
+  if (user) {
+    return null; // Will redirect via useEffect
+  }
+
+  return <>{children}</>;
+};
+
+// Onboarding Route Component
+const OnboardingRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      navigate('/auth');
+    } else if (!isLoading && user && !user.onboarding_required) {
+      navigate('/dashboard');
+    }
+  }, [user, isLoading, navigate]);
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (!user.onboarding_required) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+function AuthPage() {
+  const [isLoginMode, setIsLoginMode] = useState(true);
+  
+  return (
+    <div className="flex items-center justify-center h-screen bg-slate-50">
+      {isLoginMode ? (
+        <LoginForm onSwitchToRegister={() => setIsLoginMode(false)} />
+      ) : (
+        <RegisterForm onSwitchToLogin={() => setIsLoginMode(true)} />
+      )}
+    </div>
+  );
+}
+
+function DashboardPage() {
+  const [addIdeaModalOpen, setAddIdeaModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleOnboardingComplete = () => {
+    navigate('/dashboard');
+  };
+
   return (
     <>
       <Layout title="Idea Kanban" onAddIdea={() => setAddIdeaModalOpen(true)}>
@@ -89,12 +162,47 @@ function AppContent() {
   );
 }
 
+function OnboardingPage() {
+  const navigate = useNavigate();
+
+  const handleOnboardingComplete = () => {
+    navigate('/dashboard');
+  };
+
+  return <OnboardingWizard onComplete={handleOnboardingComplete} />;
+}
+
+function AppContent() {
+  return (
+    <Routes>
+      <Route path="/auth" element={
+        <AuthRoute>
+          <AuthPage />
+        </AuthRoute>
+      } />
+      <Route path="/onboarding" element={
+        <OnboardingRoute>
+          <OnboardingPage />
+        </OnboardingRoute>
+      } />
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <DashboardPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
+  );
+}
+
 export default function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <AppContent />
+          <Toaster />
         </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>
