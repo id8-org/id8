@@ -9,6 +9,7 @@ import { getAllIdeas, generateIdea } from './lib/api';
 import './App.css';
 import { useNavigate, Routes, Route, Navigate } from 'react-router-dom';
 import Kanban from './pages/Kanban';
+import Profile from './pages/Profile';
 import { Sparkles } from 'lucide-react';
 import AskAIWindow from './components/ui/AskAIWindow';
 import { AddIdeaModal } from './components/AddIdeaModal';
@@ -17,16 +18,30 @@ import { useIdeas } from './hooks/useIdeas';
 import Layout from './components/Layout';
 import { refreshApiAuthHeader } from './lib/api';
 
+// Error boundary types
+interface ErrorInfo {
+  componentStack: string;
+  errorBoundary?: React.ComponentType<React.PropsWithChildren> | null;
+  errorBoundaryName?: string | null;
+  errorBoundaryStack?: string | null;
+}
+
+interface AppError {
+  message: string;
+  stack?: string;
+  name?: string;
+}
+
 // Global error boundary
-class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: any }> {
-  constructor(props: any) {
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: AppError | null }> {
+  constructor(props: { children: React.ReactNode }) {
     super(props);
     this.state = { hasError: false, error: null };
   }
-  static getDerivedStateFromError(error: any) {
+  static getDerivedStateFromError(error: AppError) {
     return { hasError: true, error };
   }
-  componentDidCatch(error: any, errorInfo: any) {
+  componentDidCatch(error: AppError, errorInfo: ErrorInfo) {
     console.error('Global error boundary caught:', error, errorInfo);
   }
   handleReset = () => {
@@ -172,6 +187,22 @@ function OnboardingPage() {
   return <OnboardingWizard onComplete={handleOnboardingComplete} />;
 }
 
+function KanbanPage() {
+  return (
+    <Layout title="Idea Kanban">
+      <Kanban />
+    </Layout>
+  );
+}
+
+function ProfilePage() {
+  return (
+    <Layout title="Profile">
+      <Profile />
+    </Layout>
+  );
+}
+
 function AppContent() {
   return (
     <Routes>
@@ -188,6 +219,16 @@ function AppContent() {
       <Route path="/dashboard" element={
         <ProtectedRoute>
           <DashboardPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/kanban" element={
+        <ProtectedRoute>
+          <KanbanPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/profile" element={
+        <ProtectedRoute>
+          <ProfilePage />
         </ProtectedRoute>
       } />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />

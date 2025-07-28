@@ -738,10 +738,10 @@ const SidebarNavigation: React.FC = () => {
         </Link>
       </SidebarMenuItem>
       <SidebarMenuItem>
-        <Link to="/cards">
+        <Link to="/dashboard">
           <SidebarMenuButton isActive={location.pathname === '/cards'}>
             <Book />
-            Cards
+            Ideas
           </SidebarMenuButton>
         </Link>
       </SidebarMenuItem>

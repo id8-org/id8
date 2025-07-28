@@ -9,15 +9,15 @@ import { z } from 'zod';
 import { ideaSchema } from '@/types/schemas';
 
 interface KanbanBoardProps {
-  openAskAI: (context: { type: 'profile' } | { type: 'idea', idea: any } | { type: 'version', idea: any, version: number }) => void;
+  openAskAI: (context: { type: 'profile' } | { type: 'idea', idea: Idea } | { type: 'version', idea: Idea, version: number }) => void;
 }
 
 // Defensive: always use safeArray() for any .length or .map on possibly undefined fields
-function safeArray(val: any) {
+function safeArray<T>(val: T[] | undefined | null): T[] {
   return Array.isArray(val) ? val : [];
 }
 
-function ErrorFallback({ error, rawData }: { error: any; rawData?: any }) {
+function ErrorFallback({ error, rawData }: { error: Error; rawData?: unknown }) {
   return (
     <div className="flex flex-col items-center justify-center h-full p-8">
       <div className="text-red-600 font-bold text-lg mb-2">Could not load Kanban board</div>
