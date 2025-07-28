@@ -22,11 +22,39 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
     background-color: #ffffff;
+}
+
+/* Constrain form content to prevent excessive white space */
+.auth-form > * {
+    width: 100%;
+    max-width: 400px;
 }
 
 /* Ensure a strict 50/50 split */
 .auth-container > .auth-image,
 .auth-container > .auth-form {
     flex: 1 1 50%;
+}
+
+/* Responsive design for mobile */
+@media (max-width: 768px) {
+    .auth-container {
+        flex-direction: column;
+    }
+    
+    .auth-image {
+        flex: 0 0 auto;
+        height: 200px;
+    }
+    
+    .auth-form {
+        flex: 1;
+        padding: 1rem;
+    }
+    
+    .auth-form > * {
+        max-width: none;
+    }
 }

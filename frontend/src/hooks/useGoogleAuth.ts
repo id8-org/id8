@@ -88,7 +88,7 @@ export const useGoogleAuth = () => {
           try {
             console.log('Sending authorization code to backend...');
             // Send the authorization code to our backend for processing
-            const authResponse = await api.post('/api/auth/google/code', { // Corrected endpoint
+            const authResponse = await api.post('/api/auth/google/code', {
               code: response.code,
             });
 
