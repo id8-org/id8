@@ -859,126 +859,32 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
     }
   };
 
-  const handleStepSubmit = async () => {
-    setIsLoading(true);
+  const handleStepSubmit = async (step: number, data: any) => {
     try {
-      switch (currentStep) {
-        case 1:
-          if (!formData.accountType) {
-            setIsLoading(false);
-            return;
-          }
-          setCurrentStep(2);
-          setIsLoading(false);
-          return;
-        case 2:
-          if (resumeUploadStatus !== 'success' && resumeUploadStatus !== 'skipped') {
-            setIsLoading(false);
-            return;
-          }
-          setCurrentStep(3);
-          setIsLoading(false);
-          return;
-        case 3: {
-          let locationToSend: string = '';
-          if (typeof formData.location === 'object' && formData.location !== null) {
-            const loc = formData.location as { city?: string; state?: string; country?: string };
-            locationToSend = [loc.city, loc.state, loc.country].filter(Boolean).join(', ');
-          } else if (typeof formData.location === 'string') {
-            locationToSend = formData.location;
-          }
-          await api.post('/auth/onboarding/step1', toSnakeCase({
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            location: locationToSend,
-            background: formData.background
-          }));
-          break;
-        }
-        case 4:
-          // Goals step - save goals and timeline
-          await api.post('/auth/onboarding/step2', toSnakeCase({
-            goals: formData.goals || [],
-            timeline: formData.timeline
-          }));
-          break;
-        case 5:
-          // Experience step - save experience, industries, education
-          await api.post('/auth/onboarding/step3', toSnakeCase({
-            experience_years: formData.experienceYears,
-            industries: formData.industries || [],
-            education_level: formData.educationLevel
-          }));
-          break;
-        case 6:
-          // Business Verticals step
-          await api.post('/auth/onboarding/step4', toSnakeCase({
-            interests: formData.interests
-          }));
-          break;
-        case 7:
-          // Business Horizontals step
-          await api.post('/auth/onboarding/step5', toSnakeCase({
-            horizontals: formData.horizontals
-          }));
-          break;
-        case 8:
-          // Business Models step
-          await api.post('/auth/onboarding/step6', toSnakeCase({
-            business_models: formData.businessModels
-          }));
-          break;
-        case 9:
-          // Preferences step
-          await api.post('/auth/onboarding/step7', toSnakeCase({
-            work_style: formData.workStyle,
-            funding_preference: formData.fundingPreference,
-            location_preference: formData.locationPreference
-          }));
-          break;
-        case 10:
-          if (!privacyChecked || !termsChecked) {
-            toast({
-              title: "Agreement Required",
-              description: "You must agree to the Privacy Policy and Terms of Service to complete onboarding.",
-              variant: "destructive",
-            });
-            setIsLoading(false);
-            return;
-          }
-          if (!formData.riskTolerance || !formData.timeAvailability) {
-            toast({
-              title: "Missing Information",
-              description: "Please select your risk tolerance and time availability.",
-              variant: "destructive",
-            });
-            setIsLoading(false);
-            return;
-          }
-          // Complete onboarding with all data
-          const payload = {
-            ...formData,
-            teamInvites: formData.accountType === 'team' ? formData.teamInvites : [],
-            preferredBusinessModels: formData.businessModels.length
-              ? formData.businessModels
-              : formData.businessModels,
-            verticals: formData.interests.length
-              ? formData.interests
-              : formData.interests,
-          };
-          await api.post('/auth/onboarding/complete', toSnakeCase(payload));
-          onComplete();
-          setIsLoading(false);
-          return;
+      setIsLoading(true);
+      let updateData = { ...formData, ...data };
+
+      // Convert keys to snake_case for the API
+      updateData = Object.fromEntries(
+        Object.entries(updateData).map(([key, value]) => [toSnakeCase(key), value])
+      );
+
+      // Update the form data state
+      setFormData(updateData);
+
+      // API call to update profile
+      await api.put('/auth/profile', updateData);
+
+      // After the final step, refresh the user data
+      if (step === totalSteps) {
+        await updateProfile(); // Call refreshUser here
+        onComplete?.();
       }
-      setCurrentStep(currentStep + 1);
+
+      setCurrentStep(step + 1);
     } catch (error) {
-      console.error('Onboarding error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save your information. Please try again.",
-        variant: "destructive",
-      });
+      console.error('Error submitting step:', error);
+      // Handle error appropriately
     } finally {
       setIsLoading(false);
     }
@@ -1040,7 +946,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
         </Button>
         
         <Button
-          onClick={handleStepSubmit}
+          onClick={() => handleStepSubmit(currentStep, {})}
           disabled={!canProceed() || isLoading}
         >
           {isLoading ? (
@@ -1060,4 +966,4 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
       </div>
     </div>
   );
-}; 
+};

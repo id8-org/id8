@@ -32,3 +32,4 @@ pydantic-ai[full]
 fastapi
 starlette
 greenlet
+dspy-ai
