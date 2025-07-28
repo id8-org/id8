@@ -15,7 +15,7 @@ from app.llm_center import LLMCenter, PromptType, ProcessingContext
 from app.tiers import get_tier_config, get_account_type_config
 from app.utils.json_repair_util import extract_json_from_llm_response
 
-router = APIRouter(prefix="/resume", tags=["resume"])
+router = APIRouter(tags=["resume"])
 
 # Ensure upload directory exists
 UPLOAD_DIR = "uploads/resumes"

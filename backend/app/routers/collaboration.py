@@ -12,7 +12,7 @@ from app.tiers import get_tier_config, get_account_type_config
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/collaboration", tags=["Collaboration"])
+router = APIRouter(tags=["collaboration"])
 
 # Helper function to check for idea ownership
 def get_idea_and_check_ownership(idea_id: str, db: Session, current_user: User) -> Idea:

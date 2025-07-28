@@ -25,7 +25,10 @@ from app.types import DeepDiveIdeaData, IteratingIdeaData, ConsideringIdeaData, 
 from app.utils.json_repair_util import repair_json_with_py, extract_json_from_llm_response
 from app.utils.context_utils import context_idea, context_user
 from app.utils.prompt_loader import load_prompt
-from pydantic_ai.agent import Agent
+try:
+    from pydantic_ai.agent import Agent
+except ImportError:
+    Agent = None  # Graceful fallback if pydantic-ai is not available
 
 # Backward compatibility imports - DEPRECATED
 from app.llm_center.legacy_wrappers import *
@@ -65,7 +68,9 @@ def _load_groq_keys():
 
 GROQ_API_KEYS = _load_groq_keys()
 if not GROQ_API_KEYS:
-    raise ValueError("At least one GROQ_API_KEY_N must be set in the environment (e.g., GROQ_API_KEY_1, GROQ_API_KEY_2, ...)")
+    import warnings
+    warnings.warn("No GROQ_API_KEY found in environment. LLM functionality will be limited.")
+    GROQ_API_KEYS = ["dummy_key"]  # Fallback for development/testing
 
 _groq_key_counter = 0
 _groq_key_lock = asyncio.Lock()

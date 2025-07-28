@@ -8,7 +8,7 @@ import uuid
 from app.llm_center.legacy_wrappers import generate_iteration_experiment_pydanticai
 from datetime import datetime
 
-router = APIRouter(prefix="/iterating", tags=["iterating"])
+router = APIRouter(tags=["iterating"])
 
 @router.get("/idea/{idea_id}", response_model=List[dict[str, Any]])
 def get_iteratings_for_idea(idea_id: str, db: Session = Depends(get_db)):

@@ -13,7 +13,7 @@ import logging
 # Set up logging
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/repos", tags=["repos"])
+router = APIRouter(tags=["repos"])
 
 
 @router.get("/", response_model=List[RepoOut])

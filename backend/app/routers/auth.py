@@ -42,7 +42,7 @@ from app.services.github_oauth import get_github_access_token, get_github_user_i
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/auth", tags=["authentication"])
+router = APIRouter(tags=["authentication"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")

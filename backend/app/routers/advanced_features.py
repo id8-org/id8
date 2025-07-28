@@ -49,7 +49,7 @@ from app.services.iterating_service import (
 from app.types import SuggestedCreate, SuggestedOut, IteratingCreate, IteratingOut
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/advanced", tags=["Advanced Features"])
+router = APIRouter(tags=["advanced"])
 
 def get_all_idea_context(db: Session, idea_id: str) -> dict[str, object]:
     """Fetch all advanced feature data for an idea and return as a dict."""
@@ -598,7 +598,7 @@ def get_business_options():
         "business_vertical_groups": BUSINESS_VERTICAL_GROUPS,
     }) 
 
-router = APIRouter(prefix="/deep-dive", tags=["Deep Dive"])
+# Deep dive and iterating endpoints are now part of the main advanced features router
 
 @router.post("/", response_model=DeepDiveOut)
 def create_deep_dive(deep_dive: DeepDiveCreate, db: Session = Depends(get_db)):
