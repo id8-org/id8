@@ -11,7 +11,7 @@
  */
 
 import axios from 'axios';
-import { normalizeIdea } from '../components/IdeaWorkspace';
+import { normalizeIdea } from './ideaWorkspaceUtils';
 
 /**
  * API base URL - configurable via environment variable

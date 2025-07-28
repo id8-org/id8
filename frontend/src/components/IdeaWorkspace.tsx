@@ -1,76 +1,44 @@
 // IMPORTANT: This component must only be rendered as a child of the main app layout, which provides the sidebar.
 // If you render this directly, the sidebar will not appear.
 
-import React, { useState, useEffect, useCallback, type ReactElement, useRef } from 'react';
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Star, Lightbulb, Target, TrendingUp, Users, ArrowRight, StickyNote, Save, Edit3, Rocket, Clock, Brain, Briefcase, BarChart, GripVertical, Filter, Eye, EyeOff, Calendar, Code, Zap, Loader2, CheckCircle, ChevronRight, ChevronDown, ChevronLeft, ChevronUp, MessageCircle, LayoutDashboard, Plus, UserCircle, Menu } from 'lucide-react';
-import { getDeepDiveVersions, createDeepDiveVersion, restoreDeepDiveVersion, fetchIdeas, updateIdeaStatus, getAllIdeas, triggerDeepDive, getIdeaById, triggerIterationTasks, triggerConsiderationTasks, triggerClosureTasks, updateIdea, getShortlist, addToShortlist, removeFromShortlist, getIdeasByStatus } from "../lib/api";
-import type { IdeaStatus, DeepDiveVersion, Repo } from '../lib/api';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import type { AxiosError } from 'axios';
 import { useToast } from "@/hooks/use-toast";
-import { ToastAction } from "@/components/ui/toast";
-import { useNavigate, Link } from "react-router-dom";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { getEffortColor } from '../lib/utils';
-import { IdeaFilterBar } from './IdeaFilterBar';
-import ClosureReasonModal from './ui/ClosureReasonModal';
-import AskAIWindow from './ui/AskAIWindow';
-import { MvpChecklist } from './MvpChecklist';
-import Confetti from 'react-confetti';
-import { mapIdeaToIdeaModalProps, toSuggestedIdeaCard, toDeepDiveIdeaCard, toIteratingIdeaCard, filterIdeas, sortIdeas, IdeaFilters } from '@/lib/ideaUtils';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import UnifiedIdeaCard from './UnifiedIdeaCard';
+import { 
+  getDeepDiveVersions, 
+  createDeepDiveVersion, 
+  restoreDeepDiveVersion, 
+  getIdeaById, 
+  updateIdea, 
+  getShortlist, 
+  addToShortlist, 
+  removeFromShortlist, 
+  getIdeasByStatus 
+} from "../lib/api";
+import type { IdeaStatus, DeepDiveVersion, Repo } from '../lib/api';
+import { filterIdeas, sortIdeas, IdeaFilters } from '@/lib/ideaUtils';
 import UnifiedIdeaModal from './UnifiedIdeaModal';
-import type { SuggestedIdeaCard, DeepDiveIdeaCard, IteratingIdeaCard, DeepDiveStage } from '@/types/ideaModels';
 import { IterationStepper } from './IterationStepper';
-import type { Idea as IdeaType } from '../types/idea';
-import { api } from "@/lib/api";
-
+import ClosureReasonModal from './ui/ClosureReasonModal';
 import KanbanColumn from './KanbanColumn';
 import type { Idea as NormalizedIdea } from '../types/idea';
+import { 
+  Stage,
+  mapStatusToStage,
+  mapStageToStatus,
+  normalizeIdea,
+  getRequiredTasksForTransition,
+  executeCascadingTasks,
+  mapDeepDiveToStage,
+  getStageAnalytics
+} from '../lib/ideaWorkspaceUtils';
+import { LIFECYCLE_STAGES } from '../types/idea';
+import { api } from "@/lib/api";
 
-
-// Define a single Stage type for consistency
-export type Stage = 'suggested' | 'deep-dive' | 'iterating' | 'considering' | 'closed';
-
-// Utility to map backend status to Stage
-function mapStatusToStage(status: string): Stage {
-  switch (status) {
-    case 'deep_dive':
-      return 'deep-dive';
-    case 'iterating':
-      return 'iterating';
-    case 'considering':
-      return 'considering';
-    case 'closed':
-      return 'closed';
-    default:
-      return 'suggested';
-  }
-}
-
-// Utility to get potential consistently
-function getPotential(idea: NormalizedIdea): number {
-  if (typeof idea.potential === 'number') return idea.potential;
-  if (typeof idea.score === 'number' && typeof idea.mvp_effort === 'number') return idea.score - idea.mvp_effort;
-  return 0;
-}
-
-// Update LIFECYCLE_STAGES to use Stage
-export const LIFECYCLE_STAGES: { key: Stage; label: string }[] = [
-  { key: 'suggested', label: 'Suggested' },
-  { key: 'deep-dive', label: 'Deep Dive' },
-  { key: 'iterating', label: 'Iterating' },
-  { key: 'considering', label: 'Considering' },
-  { key: 'closed', label: 'Closed' },
-];
+// LIFECYCLE_STAGES imported from types/idea
 
 interface IdeaWorkspaceProps {
   ideasByStage: {
@@ -93,6 +61,7 @@ interface IdeaWorkspaceProps {
   openAskAI: (context: { type: 'profile' } | { type: 'idea', idea: NormalizedIdea } | { type: 'version', idea: NormalizedIdea, version: number }) => void;
 }
 
+// Filter state interface
 interface FilterState {
   language: string;
   age: string;
@@ -103,116 +72,6 @@ interface FilterState {
   showGenerated: boolean;
   minScore: number;
   maxEffort: number;
-}
-
-// Utility to map Stage back to backend status string
-function mapStageToStatus(stage: Stage): IdeaStatus {
-  switch (stage) {
-    case 'deep-dive':
-      return 'deep_dive';
-    case 'iterating':
-      return 'iterating';
-    case 'considering':
-      return 'considering';
-    case 'closed':
-      return 'closed';
-    default:
-      return 'suggested';
-  }
-}
-
-// Utility to create a blank idea for Add Idea modal
-function getBlankIdea(): NormalizedIdea {
-  return {
-    id: '',
-    idea_number: 0,
-    user_id: '',
-    repo_id: '',
-    title: '',
-    hook: '',
-    value: '',
-    evidence: '',
-    differentiator: '',
-    call_to_action: '',
-    deep_dive: undefined,
-    score: 0,
-    mvp_effort: 0,
-    deep_dive_requested: false,
-    status: 'suggested',
-    type: '',
-    business_model: '',
-    market_positioning: '',
-    revenue_streams: '',
-    target_audience: '',
-    competitive_advantage: '',
-    go_to_market_strategy: '',
-    success_metrics: '',
-    risk_factors: '',
-    iteration_notes: '',
-    business_intelligence: {},
-    repo_usage: '',
-    repo_language: '',
-    repo_stars: 0,
-    repo_forks: 0,
-    repo_watchers: 0,
-    repo_url: '',
-    assumptions: [],
-    source_type: undefined, // must be undefined, not empty string
-    vertical: '',
-    horizontal: '',
-    scope_commitment: '',
-    source_of_inspiration: '',
-    problem_statement: '',
-    elevator_pitch: '',
-    core_assumptions: [],
-    riskiest_assumptions: [],
-    generation_notes: '',
-    customer_validation_plan: '',
-    potential: 0,
-    tam: 0,
-    sam: 0,
-    som: 0,
-    iterating: undefined,
-  };
-}
-
-// Add a normalization helper for ideas
-export function normalizeIdea(idea: Partial<NormalizedIdea> & { id?: string }): NormalizedIdea {
-  let type = idea.type;
-  if (typeof type === 'string') {
-    const t = type.trim().toLowerCase().replace(/[-_\s]/g, '');
-    if (t === 'sidehustle') type = 'side_hustle';
-    else if (t === 'fullscale' || t === 'fulltime' || t === 'full_time') type = 'full_scale';
-  }
-  let source_type: 'byoi' | 'madlib' | 'system' | undefined = undefined;
-  if (idea.source_type === 'byoi' || idea.source_type === 'madlib' || idea.source_type === 'system') {
-    source_type = idea.source_type;
-  }
-  // Defensive deep_dive normalization: ensure customer_validation_plan exists
-  const deep_dive = idea.deep_dive && typeof idea.deep_dive === 'object' ? { ...idea.deep_dive } : {};
-  if (deep_dive) {
-    const sections = (deep_dive as Record<string, unknown>).sections;
-    // For each major section, ensure customer_validation_plan exists
-    ['market_opportunity', 'execution_capability', 'business_viability', 'strategic_alignment_risks'].forEach(key => {
-      const section = (deep_dive as Record<string, Record<string, unknown>>)[key];
-      if (section) {
-        if (typeof section.customer_validation_plan !== 'string') {
-          section.customer_validation_plan = '';
-        }
-      }
-    });
-    // Defensive: if sections exist, keep them
-    if (sections) {
-      (deep_dive as Record<string, unknown>).sections = sections;
-    }
-  }
-  return {
-    ...idea,
-    type,
-    source_type,
-    deep_dive,
-    iterating: idea.iterating && typeof idea.iterating === 'object' ? idea.iterating : {},
-  } as NormalizedIdea;
 }
 
 const normalizeIdeas = (ideas: Array<Partial<NormalizedIdea> & { id?: string }>): NormalizedIdea[] => ideas.map(normalizeIdea);
@@ -806,147 +665,9 @@ export function IdeaWorkspace({
 
   
 
-  // Helper function to determine required tasks based on status transition
-  const getRequiredTasksForTransition = (fromStatus: Stage, toStatus: Stage): string[] => {
-    const taskMap: Record<string, string[]> = {
-      'suggested->deep-dive': ['deep_dive'],
-      'suggested->iterating': ['deep_dive', 'iterating'],
-      'suggested->considering': ['deep_dive', 'iterating', 'considering'],
-      'suggested->closed': ['deep_dive', 'iterating', 'considering', 'closure'],
-      'deep-dive->iterating': ['iterating'],
-      'deep-dive->considering': ['iterating', 'considering'],
-      'deep-dive->closed': ['iterating', 'considering', 'closure'],
-      'iterating->considering': ['considering'],
-      'iterating->closed': ['considering', 'closure'],
-      'considering->closed': ['closure']
-    };
-    
-    const key = `${fromStatus}->${toStatus}`;
-    return taskMap[key] || [];
-  };
+  // Helper function to execute cascading tasks - moved to utils
 
-  // Helper function to execute cascading tasks
-  const executeCascadingTasks = async (idea: NormalizedIdea, tasks: string[]): Promise<void> => {
-    console.log('🔍 DEBUG: Executing cascading tasks:', tasks, 'for idea', idea.id);
-    
-    for (const task of tasks) {
-      console.log(`🔍 DEBUG: Executing task: ${task} for idea ${idea.id}`);
-      
-      switch (task) {
-        case 'deep_dive': {
-          toast({ title: 'Triggering Deep Dive', description: `Running deep dive for "${idea.title}"...` });
-          // PATCH: Call triggerDeepDive to hit the backend /api/ideas/{id}/deep-dive endpoint
-          await triggerDeepDive(idea.id);
-          setFilteredIdeas(prev => prev.map(i => i.id === idea.id ? normalizeIdea({ ...i, deep_dive_requested: true }) : i));
-          
-          // Poll for deep dive completion
-          const pollDeepDive = async (retries = 30) => {
-            console.log('🔍 DEBUG: Starting deep dive polling for idea:', idea.id);
-            for (let i = 0; i < retries; i++) {
-              try {
-                console.log(`🔍 DEBUG: Polling attempt ${i + 1}/${retries}`);
-                const updated = await getIdeaById(idea.id);
-                
-                if ((updated.deep_dive_raw_response && updated.deep_dive_raw_response.length > 0) || 
-                    (updated.deep_dive && Object.keys(updated.deep_dive).length > 0)) {
-                  console.log('🔍 DEBUG: Deep dive completed');
-                  setFilteredIdeas(prev => prev.map(i => i.id === idea.id ? normalizeIdea({ ...updated, deepDiveStatus: 'ready' }) : i));
-                  
-                  toast({
-                    title: 'Deep Dive Complete',
-                    description: `"${idea.title}" analysis is ready!`,
-                  });
-                  await refreshIdeaById(idea.id); // ensure latest data
-                  return;
-                }
-                
-                await new Promise(res => setTimeout(res, 2000));
-              } catch (error) {
-                console.error('❌ ERROR: Error polling for deep dive:', error);
-                break;
-              }
-            }
-            
-            // If we get here, the deep dive didn't complete in time
-            console.warn('⚠️ WARNING: Deep dive polling timed out');
-            setFilteredIdeas(prev => prev.map(i => i.id === idea.id ? normalizeIdea({ ...i, deepDiveStatus: 'error' }) : i));
-            toast({
-              title: 'Deep Dive Timeout',
-              description: `"${idea.title}" analysis is taking longer than expected. You can retry from the idea details.`,
-              variant: 'destructive',
-            });
-          };
-          
-          await pollDeepDive();
-          break;
-        }
-          
-        case 'iterating':
-          toast({ title: 'Triggering Iterating', description: `Running iterating LLM for "${idea.title}"...` });
-          await triggerIterationTasks(idea.id);
-          break;
-          
-        case 'considering':
-          await triggerConsiderationTasks(idea.id);
-          break;
-          
-        case 'closure':
-          await triggerClosureTasks(idea.id);
-          break;
-          
-        default:
-          console.warn(`🔍 WARNING: Unknown task type: ${task}`);
-      }
-    }
-  };
-
-  // Always put 'closed' column last, and deduplicate
-  const uniqueStages = Array.from(new Set(LIFECYCLE_STAGES.map(s => s.key)));
-  const orderedStages = uniqueStages.filter(k => k !== 'closed').map(k => LIFECYCLE_STAGES.find(s => s.key === k)!).concat(LIFECYCLE_STAGES.find(s => s.key === 'closed')!);
-
-  // Helper to extract signal scores from idea.deep_dive
-  function getSignalScores(idea: NormalizedIdea): Record<string, number> | null {
-    const sections = (idea.deep_dive as any)?.sections || [];
-    if (!sections) return null;
-    const section = sections.find((s: any) => /signal score/i.test(s.title));
-    if (!section) return null;
-    try {
-      const match = section.content.match(/\{[\s\S]*\}/);
-      if (match) {
-        const obj = JSON.parse(match[0]);
-        if (typeof obj === 'object') return obj;
-      }
-    } catch {}
-    // Try to parse as key: value lines
-    const lines = section.content.split('\n');
-    const scores: Record<string, number> = {};
-    let found = false;
-    for (const line of lines) {
-      const m = line.match(/([\w\s]+):\s*(\d+)/);
-      if (m) {
-        scores[m[1].trim()] = parseInt(m[2], 10);
-        found = true;
-      }
-    }
-    return found ? scores : null;
-  }
-
-  // Helper to safely add width/height if present
-  function withFrozenSize(style: any, isDragging: boolean) {
-    const frozen: Record<string, any> = {
-      minWidth: '220px',
-      minHeight: '120px',
-      maxWidth: '100%',
-    };
-    if (isDragging) {
-      if (style && 'width' in style) frozen.width = style.width;
-      else frozen.width = '100%';
-      if (style && 'height' in style) frozen.height = style.height;
-    } else {
-      frozen.width = '100%';
-    }
-    return { ...style, ...frozen };
-  }
+  // Utility functions moved to ideaWorkspaceUtils
 
   // --- FINAL PASS: API call future-proofing ---
   // For all API calls, never pass a NormalizedIdea directly. Always pass a plain object or only the required fields.
@@ -994,39 +715,6 @@ export function IdeaWorkspace({
   const [dragOverStage, setDragOverStage] = useState<string | null>(null);
   const [showStageConfetti, setShowStageConfetti] = useState<{ [stage: string]: boolean }>({});
 
-  // 2. Helper for stage analytics
-  function getStageAnalytics(ideasForStage: NormalizedIdea[]) {
-    const arr = Array.isArray(ideasForStage) ? ideasForStage : [];
-    const count = arr.length;
-    const avgScore = count > 0 ? Math.round(arr.reduce((sum, i) => (i.score || 0) + sum, 0) / count) : 0;
-    const nextTip = count === 0 ? 'Add ideas to get started!' : avgScore >= 8 ? 'Promote your best ideas!' : 'Refine and research.';
-    return { count, avgScore, nextTip };
-  }
-
-  // Inline mapping function to convert backend deep_dive to DeepDiveStage
-  function mapDeepDiveToStage(deepDive: any) {
-    if (!deepDive) return {};
-    return {
-      product_market_fit_score: deepDive.market_opportunity?.scores?.product_market_fit,
-      market_size_score: deepDive.market_opportunity?.scores?.market_size,
-      market_timing_score: deepDive.market_opportunity?.scores?.market_timing,
-      founders_execution_score: deepDive.execution_capability?.scores?.founders_ability,
-      technical_feasibility_score: deepDive.execution_capability?.scores?.technical_feasibility,
-      go_to_market_score: deepDive.execution_capability?.scores?.go_to_market,
-      profitability_potential_score: deepDive.business_viability?.scores?.profitability_potential,
-      competitive_moat_score: deepDive.business_viability?.scores?.competitive_moat,
-      strategic_exit_score: deepDive.strategic_alignment_risks?.scores?.strategic_exit,
-      regulatory_risk_score: deepDive.strategic_alignment_risks?.scores?.regulatory_risks,
-      overall_investor_attractiveness_score: deepDive.strategic_alignment_risks?.scores?.overall_investor_score,
-      // Add narratives if needed
-    };
-  }
-
-  // Defensive helpers for nested arrays
-  function safeArray(val: any) {
-    return Array.isArray(val) ? val : [];
-  }
-
   // Add state for Kanban ideas by stage
   const [kanbanIdeasByStage, setKanbanIdeasByStage] = useState<Record<Stage, NormalizedIdea[]>>({
     suggested: [],
@@ -1039,13 +727,7 @@ export function IdeaWorkspace({
   // Add the missing deepDivePending state here
   const [deepDivePending, setDeepDivePending] = useState<string[]>([]);
 
-  // Helper to map type to label
-  function getTypeLabel(type?: string) {
-    if (!type) return '';
-    if (type === 'side_hustle') return 'Side Hustle';
-    if (type === 'full_scale') return 'Full Scale';
-    return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
-  }
+  // Utility functions moved to ideaWorkspaceUtils
 
   // --- Main render ---
   const [sidebarOpen, setSidebarOpen] = useState(true);
