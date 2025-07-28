@@ -1,54 +1,20 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { api, refreshApiAuthHeader } from '@/lib/api';
 import { toSnakeCase, toCamelCase } from '@/lib/utils';
+import type { User, UserProfile } from '@/types';
 
-interface User {
-  id: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  is_active: boolean;
-  is_verified: boolean;
-  oauth_picture?: string;
-  created_at: string;
-  updated_at: string;
-  profile?: UserProfile;
-  account_type: string;
-  tier: string;
-  onboarding_required?: boolean;
-}
-
-interface UserProfile {
-  id: string;
-  user_id: string;
-  background?: string;
-  location?: string;
-  website?: string;
-  linkedin_url?: string;
-  github_url?: string;
-  skills: string[];
-  experience_years?: number;
-  industries: string[];
-  interests: string[];
-  goals: string[];
-  preferred_business_models: string[];
-  preferred_industries: string[];
-  risk_tolerance?: string;
-  time_availability?: string;
-  onboarding_completed: boolean;
-  onboarding_step: number;
-  created_at: string;
-  updated_at: string;
-  horizontals?: string[];
-  verticals?: string[];
-  education?: string | { degree: string; institution: string }[];
+interface AuthConfig {
+  onboarding_enabled: boolean;
+  features_enabled: string[];
+  max_ideas_per_user?: number;
+  // Add other config fields as needed
 }
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
   isLoading: boolean;
-  config: any | null;
+  config: AuthConfig | null;
   login: (email: string, password: string) => Promise<void>;
   loginWithToken: (access_token: string) => Promise<void>;
   register: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
@@ -77,7 +43,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const [isLoading, setIsLoading] = useState(true);
-  const [config, setConfig] = useState<any | null>(null);
+  const [config, setConfig] = useState<AuthConfig | null>(null);
 
   // Set up axios interceptor for authentication
   useEffect(() => {
@@ -131,8 +97,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userResponse = await api.get('/auth/me');
       setUser(userResponse.data);
       setConfig(userResponse.data.config || null);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.detail || 'Login failed');
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { detail?: string } } };
+      throw new Error(apiError.response?.data?.detail || 'Login failed');
     }
   };
 
@@ -149,9 +116,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userResponse = await api.get('/auth/me');
       setUser(userResponse.data);
       setConfig(userResponse.data.config || null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Token login error:', error);
-      throw new Error(error.response?.data?.detail || 'Token login failed');
+      const apiError = error as { response?: { data?: { detail?: string } } };
+      throw new Error(apiError.response?.data?.detail || 'Token login failed');
     }
   };
 
@@ -174,8 +142,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userResponse = await api.get('/auth/me');
       setUser(userResponse.data);
       setConfig(userResponse.data.config || null);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.detail || 'Registration failed');
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { detail?: string } } };
+      throw new Error(apiError.response?.data?.detail || 'Registration failed');
     }
   };
 

@@ -27,7 +27,7 @@ interface AddIdeaModalProps {
 }
 
 // Defensive: always use safeArray() for any .length or .map on possibly undefined fields
-function safeArray(val: any) {
+function safeArray<T>(val: T[] | undefined | null): T[] {
   return Array.isArray(val) ? val : [];
 }
 
@@ -64,7 +64,7 @@ export const AddIdeaModal = ({ isOpen, onClose, onIdeaCreated, refreshIdeas }: A
 
   // Add state for stepper
   const [currentIdeaIndex, setCurrentIdeaIndex] = useState(0);
-  const [acceptedIdeas, setAcceptedIdeas] = useState<any[]>([]);
+  const [acceptedIdeas, setAcceptedIdeas] = useState<Idea[]>([]);
 
   const hasCompletedOnboarding = user?.profile?.onboarding_completed ?? false;
 
@@ -75,8 +75,8 @@ export const AddIdeaModal = ({ isOpen, onClose, onIdeaCreated, refreshIdeas }: A
   }, [user, hasCompletedOnboarding]);
 
   useEffect(() => {
-    getShortlist().then(res => {
-      if (Array.isArray(res)) setShortlist(res.map((i: any) => i.id));
+    getShortlist().then((res: Idea[]) => {
+      if (Array.isArray(res)) setShortlist(res.map((i: Idea) => i.id));
     });
   }, []);
 
@@ -213,7 +213,7 @@ export const AddIdeaModal = ({ isOpen, onClose, onIdeaCreated, refreshIdeas }: A
   };
 
   // Simple data adapter (to be moved to a util file if needed)
-  function mapIdeaToUnifiedIdeaModalProps(idea) {
+  function mapIdeaToUnifiedIdeaModalProps(idea: Idea): Idea | null {
     if (!idea) return null;
     const deepDive = idea.deep_dive || {};
     const iterating = idea.iterating || {};
@@ -534,7 +534,7 @@ export const AddIdeaModal = ({ isOpen, onClose, onIdeaCreated, refreshIdeas }: A
         {/* BYOI Review Modal - only open after AddIdeaModal closes */}
         {showReviewModal && reviewIdea && reviewIdea.id && (
           <UnifiedIdeaModal
-            idea={mapIdeaToUnifiedIdeaModalProps(reviewIdea) as any}
+            idea={mapIdeaToUnifiedIdeaModalProps(reviewIdea)}
             isOpen={showReviewModal}
             onClose={handleReviewModalClose}
           />
@@ -543,7 +543,7 @@ export const AddIdeaModal = ({ isOpen, onClose, onIdeaCreated, refreshIdeas }: A
         {/* AI-Generated Ideas Modal */}
         {showGeneratedIdeasModal && generatedIdeas.length > 0 && (
           <UnifiedIdeaModal
-            idea={mapIdeaToUnifiedIdeaModalProps(generatedIdeas[currentIdeaIndex]) as any}
+            idea={mapIdeaToUnifiedIdeaModalProps(generatedIdeas[currentIdeaIndex])}
             isOpen={showGeneratedIdeasModal}
             onClose={() => setShowGeneratedIdeasModal(false)}
             footerExtra={

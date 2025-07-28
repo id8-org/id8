@@ -1,5 +1,11 @@
 import { useState, useCallback } from 'react';
-import * as iteratingApi from '@/lib/api/iteratingApi';
+import { 
+  getIteratingById, 
+  getIteratingByIdeaId, 
+  createIterating, 
+  updateIterating, 
+  deleteIterating 
+} from '@/lib/api';
 import { Iterating, IteratingCreate } from '@/types/iterating';
 
 export function useIterating(ideaId?: string) {
@@ -12,7 +18,7 @@ export function useIterating(ideaId?: string) {
     setLoading(true);
     setError(null);
     try {
-      const response = await iteratingApi.getIteratingByIdeaId(ideaId);
+      const response = await getIteratingByIdeaId(ideaId);
       setIterating(response.data);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch iterating');
@@ -25,7 +31,7 @@ export function useIterating(ideaId?: string) {
     setLoading(true);
     setError(null);
     try {
-      const response = await iteratingApi.createIterating(data);
+      const response = await createIterating(data);
       setIterating(response.data);
       return response.data;
     } catch (err: any) {
@@ -40,7 +46,7 @@ export function useIterating(ideaId?: string) {
     setLoading(true);
     setError(null);
     try {
-      const response = await iteratingApi.updateIterating(id, data);
+      const response = await updateIterating(id, data);
       setIterating(response.data);
       return response.data;
     } catch (err: any) {
@@ -55,7 +61,7 @@ export function useIterating(ideaId?: string) {
     setLoading(true);
     setError(null);
     try {
-      await iteratingApi.deleteIterating(id);
+      await deleteIterating(id);
       setIterating(null);
     } catch (err: any) {
       setError(err.message || 'Failed to delete iterating');
