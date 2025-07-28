@@ -57,6 +57,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Check if user is authenticated on mount
   useEffect(() => {
     const checkAuth = async () => {
+      // Development mode for testing (remove in production)
+      if (import.meta.env.VITE_DEV_MODE === 'true' && import.meta.env.DEV) {
+        // Simulate different user states for testing
+        const devUser = {
+          id: '1',
+          email: 'test@example.com',
+          first_name: 'Test',
+          last_name: 'User',
+          is_verified: true,
+          is_active: true,
+          onboarding_required: false, // Toggle this to test onboarding flow
+          profile: {
+            first_name: 'Test',
+            last_name: 'User',
+            onboarding_completed: true
+          },
+          tier: 'free',
+          account_type: 'individual',
+          config: {
+            onboarding_enabled: true,
+            features_enabled: ['basic'],
+            max_ideas_per_user: 10
+          }
+        };
+        setUser(devUser);
+        setConfig(devUser.config);
+        setIsLoading(false);
+        return;
+      }
+
       if (token) {
         try {
           const response = await api.get('/auth/me');
