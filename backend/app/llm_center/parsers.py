@@ -5,9 +5,9 @@ import re
 import logging
 from typing import Dict, Any, List, Optional, Union
 
-from .types import LLMResponse, ParsedResponse, PromptType
-from ..schemas import DeepDiveIdeaData, IteratingIdeaData, ConsideringIdeaData, DeepDiveCategoryData
-from ..json_repair_util import repair_json_with_py, extract_json_from_llm_response
+from ..types.llm_types import LLMResponse, ParsedResponse, PromptType
+from ..types.schemas import DeepDiveIdeaData, IteratingIdeaData, ConsideringIdeaData, DeepDiveCategoryData
+from ..utils.json_repair_util import repair_json_with_py, extract_json_from_llm_response
 
 
 logger = logging.getLogger(__name__)

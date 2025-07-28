@@ -3,7 +3,7 @@
 import os
 from typing import Dict, Any, Optional
 from jinja2 import Template, Environment, FileSystemLoader
-from .types import PromptType, ProcessingContext
+from ..types.llm_types import PromptType, ProcessingContext
 
 
 class PromptManager:

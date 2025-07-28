@@ -1,6 +1,6 @@
 from guardrails import Guard
 import json
-from app.schemas import DeepDiveStage, IteratingStage, ConsideringIdeaData, ClosedStage
+from app.types import DeepDiveStage, IteratingStage, ConsideringIdeaData, ClosedStage
 
 def validate_llm_output(stage: str, llm_output: str | dict) -> dict:
     """

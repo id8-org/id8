@@ -6,7 +6,7 @@ from google.auth.exceptions import GoogleAuthError
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.models import User
-from app.schemas import GoogleUserInfo
+from app.types import GoogleUserInfo
 import logging
 
 logger = logging.getLogger(__name__)

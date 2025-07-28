@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.orm import Session
 from typing import List, Any
 from app.models import Idea, Iterating
-from app.schemas import IteratingExperiment
+from app.types import IteratingExperiment
 from app.db import get_db
 import uuid
 from app.llm_center.legacy_wrappers import generate_iteration_experiment_pydanticai

@@ -3,7 +3,7 @@
 import os
 from typing import Dict, List, Optional, Any
 from pydantic import BaseModel
-from .types import LLMProvider
+from ..types.llm_types import LLMProvider
 
 
 class ProviderConfig(BaseModel):

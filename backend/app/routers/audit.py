@@ -10,7 +10,7 @@ from ..db import get_db
 from ..auth import get_current_user
 from ..schemas import AuditLogCreate, AuditLogOut
 from ..models import User, AuditLog
-from app.utilities import get_client_ip, get_user_agent
+from app.utils.business_utils import get_client_ip, get_user_agent
 
 logger = logging.getLogger(__name__)
 

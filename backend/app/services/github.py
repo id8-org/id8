@@ -400,7 +400,7 @@ async def refresh_trending_repos(db, languages: Optional[List[str]] = None, peri
             return 0
         
         # Save repos to database
-        from app.utilities import save_repos
+        from app.utils.business_utils import save_repos
         saved_count = save_repos(repos, db, period)
         
         logger.info(f"Successfully refreshed {saved_count} trending repositories")

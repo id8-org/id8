@@ -4,7 +4,7 @@ import logging
 from app.services.personalized_idea_service import run_llm_with_user_context
 from fastapi.responses import StreamingResponse, JSONResponse
 import io
-from app.utilities import BUSINESS_MODEL_GROUPS, BUSINESS_HORIZONTAL_GROUPS, BUSINESS_VERTICAL_GROUPS
+from app.utils.business_utils import BUSINESS_MODEL_GROUPS, BUSINESS_HORIZONTAL_GROUPS, BUSINESS_VERTICAL_GROUPS
 from typing import List
 
 try:
@@ -15,7 +15,7 @@ except ImportError:
 
 from ..db import get_db
 from ..auth import get_current_user
-from ..schemas import (
+from ..types import (
     CaseStudy, CaseStudyCreate, CaseStudyRequest,
     MarketSnapshot, MarketSnapshotCreate, MarketSnapshotRequest,
     LensInsight, LensInsightCreate, LensInsightRequest,
@@ -39,14 +39,14 @@ from app.llm_center.legacy_wrappers import (
     generate_investor_deck
 )
 import uuid
-from app.schemas import DeepDiveCreate, DeepDiveOut
+from app.types import DeepDiveCreate, DeepDiveOut
 from app.services.suggested_service import (
     save_suggested, get_suggested_by_id, get_suggested_by_idea_id, update_suggested
 )
 from app.services.iterating_service import (
     create_iterating, get_iterating_by_id, get_latest_iterating_by_idea, update_iterating, delete_iterating
 )
-from app.schemas import SuggestedCreate, SuggestedOut, IteratingCreate, IteratingOut
+from app.types import SuggestedCreate, SuggestedOut, IteratingCreate, IteratingOut
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/advanced", tags=["Advanced Features"])

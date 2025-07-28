@@ -1,5 +1,5 @@
 from crud import add_to_shortlist, remove_from_shortlist, get_shortlist_ideas, create_deep_dive_version, get_deep_dive_versions, get_deep_dive_version, restore_deep_dive_version, update_idea_status
-from app.schemas import IdeaOut, ShortlistOut, DeepDiveVersionOut, IdeaGenerationRequest, IdeaVersionQnACreate, IdeaVersionQnAOut, DeepDiveRequest, ProfileQnAOut, ProfileQnACreate, IdeasOut
+from app.types import IdeaOut, ShortlistOut, DeepDiveVersionOut, IdeaGenerationRequest, IdeaVersionQnACreate, IdeaVersionQnAOut, DeepDiveRequest, ProfileQnAOut, ProfileQnACreate, IdeasOut
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Body, Header, Request, status
 from fastapi.responses import JSONResponse, HTMLResponse
@@ -17,7 +17,7 @@ import json
 from app.tiers import get_tier_config, get_account_type_config
 import asyncio
 import traceback
-from app.context_utils import assemble_llm_context, context_user, context_profile, context_repo, context_idea
+from app.utils.context_utils import assemble_llm_context, context_user, context_profile, context_repo, context_idea
 import uuid
 import re
 import random
@@ -236,7 +236,7 @@ def map_flat_deep_dive(flat):
     }
 
 def safe_idea_out(idea, idx=None):
-    from app.schemas import IdeaOut, DeepDiveIdeaData, IteratingIdeaData
+    from app.types import IdeaOut, DeepDiveIdeaData, IteratingIdeaData
     # Always create a new dict to avoid SQLAlchemy reference issues
     as_dict = dict(idea.as_dict()) if hasattr(idea, 'as_dict') else dict(idea)
     # Always include user_id and repo_id for frontend filtering
@@ -437,7 +437,7 @@ async def generate_ideas(
         # Always build user_context securely on the backend
         user_profile = getattr(current_user, 'profile', None)
         user_resume = getattr(current_user, 'resume', None)
-        from app.context_utils import build_user_context
+        from app.utils.context_utils import build_user_context
         user_context = build_user_context(current_user, user_profile, user_resume)
         # Build context for LLM (do NOT use request.user_context)
         context = {
@@ -769,7 +769,7 @@ Differentiator: {idea_data.get('differentiator', 'N/A')}
         db.commit()
         db.refresh(db_idea)
         
-        from app.schemas import IdeaOut
+        from app.types import IdeaOut
         log_and_emit_audit(db, current_user.id, 'idea_validated', 'idea', db_idea.id, db_idea.as_dict())
         return {
             "idea": IdeaOut.model_validate(db_idea),
@@ -900,7 +900,7 @@ async def generate_deep_dive_for_idea(
             # --- ATOMIC CONTEXT ASSEMBLY ---
             user_profile = getattr(current_user, 'profile', None)
             user_resume = getattr(current_user, 'resume', None)
-            from app.context_utils import build_user_context
+            from app.utils.context_utils import build_user_context
             user_context = build_user_context(current_user, user_profile, user_resume)
             repo_obj = idea.repo if getattr(idea, 'repo_id', None) else None
             context = assemble_llm_context(
@@ -1304,7 +1304,7 @@ async def consider_idea(id: str, request: Request, db: Session = Depends(get_db)
     context_update = await request.json() if hasattr(request, 'json') else {}
     context_update = dict(context_update)
     # --- ATOMIC CONTEXT ASSEMBLY ---
-    from app.context_utils import assemble_llm_context, context_user, context_profile, context_repo, context_idea
+    from app.utils.context_utils import assemble_llm_context, context_user, context_profile, context_repo, context_idea
     user = db.query(User).filter(User.id == getattr(idea, 'user_id', None)).first() if getattr(idea, 'user_id', None) else None
     user_profile = getattr(user, 'profile', None) if user else None
     user_resume = getattr(user, 'resume', None) if user else None

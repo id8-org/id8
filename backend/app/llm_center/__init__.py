@@ -7,7 +7,7 @@ prompt management, and AI-based analysis in the application.
 
 from .core import LLMCenter
 from .config import LLMConfig
-from .types import (
+from ..types.llm_types import (
     LLMProvider,
     PromptType,
     LLMRequest,

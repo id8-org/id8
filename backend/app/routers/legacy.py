@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.db import get_db
 from app.models import Idea
-from app.schemas import IdeaOut
+from app.types import IdeaOut
 import logging
 
 # --- Legacy/Experimental Imports ---

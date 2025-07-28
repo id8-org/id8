@@ -21,9 +21,9 @@ import asyncio
 import time
 import traceback
 from jinja2 import Template
-from app.schemas import DeepDiveIdeaData, IteratingIdeaData, ConsideringIdeaData, DeepDiveCategoryData, IteratingExperiment
-from app.json_repair_util import repair_json_with_py, extract_json_from_llm_response
-from app.context_utils import context_idea, context_user
+from app.types import DeepDiveIdeaData, IteratingIdeaData, ConsideringIdeaData, DeepDiveCategoryData, IteratingExperiment
+from app.utils.json_repair_util import repair_json_with_py, extract_json_from_llm_response
+from app.utils.context_utils import context_idea, context_user
 from app.utils.prompt_loader import load_prompt
 from pydantic_ai.agent import Agent
 
@@ -591,7 +591,7 @@ def convert_old_deep_dive_format(old_data: Dict[str, Any]) -> DeepDiveIdeaData:
 
 def robust_parse_deep_dive_raw_response(raw_response: str) -> DeepDiveIdeaData:
     import re, json
-    from app.schemas import DeepDiveIdeaData
+    from app.types import DeepDiveIdeaData
     if not raw_response:
         return DeepDiveIdeaData()
     # Remove triple backticks and whitespace

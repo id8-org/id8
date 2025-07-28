@@ -2,7 +2,7 @@ from typing import Optional, Dict, Any, List
 from app.models import User, UserProfile, UserResume, Repo
 from app.llm_center.legacy_wrappers import generate_idea_pitches, generate_deep_dive, sanitize_idea_fields
 import logging
-from app.context_utils import build_user_context
+from app.utils.context_utils import build_user_context
 
 logger = logging.getLogger(__name__)
 
