@@ -13,6 +13,7 @@ import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/comp
 import { toast } from '@/components/ui/use-toast';
 import { updateIdeaStatus } from '@/lib/api';
 import { GlobalActionsDropdown } from "./GlobalActionsDropDown";
+import { DeepDiveVisualizer } from "./DeepDiveVisualizer";
 
 
 interface UnifiedIdeaModalProps {
@@ -627,6 +628,11 @@ const UnifiedIdeaModal: React.FC<UnifiedIdeaModalProps> = ({
                       </div>
                     </div>
                   )}
+                  
+                  {/* Business Intelligence Dashboard */}
+                  <div className="mt-6">
+                    <DeepDiveVisualizer idea={normalizedIdea} />
+                  </div>
                 </TabsContent>
               )}
 

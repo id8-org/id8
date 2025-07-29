@@ -1,5 +1,6 @@
 // Import shared types from api.ts to avoid duplication
-import type { EvidenceReference, DeepDiveStage, IteratingStage, BusinessIntelligence } from './api';
+import type { EvidenceReference, DeepDiveStage, IteratingStage } from './api';
+import type { BusinessIntelligence } from './business-intelligence';
 
 // Re-export types for backward compatibility
 export type { EvidenceReference, DeepDiveStage, IteratingStage, BusinessIntelligence };
@@ -85,6 +86,7 @@ export interface Idea {
   riskiest_assumptions?: string[];
   generation_notes?: string;
   iterating?: IteratingStage;
+  business_intelligence?: BusinessIntelligence;
   // Repository-related fields
   repo_language?: string;
   repo_stars?: number;
