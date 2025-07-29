@@ -93,13 +93,7 @@ export interface IteratingStage {
   generation_notes?: string;
 }
 
-// Business Intelligence types
-export interface BusinessIntelligence {
-  market_analysis?: Record<string, any>;
-  competitive_landscape?: Record<string, any>;
-  customer_segments?: Record<string, any>;
-  financial_projections?: Record<string, any>;
-}
+// Business Intelligence types moved to /types/business-intelligence.ts to avoid duplication
 
 // Shortlist types
 export interface Shortlist {
