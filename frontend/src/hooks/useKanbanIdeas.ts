@@ -5,11 +5,15 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useIdeas } from './useIdeas';
-import type { Stage } from '@/types/index';
+import type { Stage } from '@/types/idea';
 import type { Idea } from '@/lib/api';
 
 interface KanbanIdeasState {
-  [K in Stage]: Idea[];
+  suggested: Idea[];
+  deep_dive: Idea[];
+  iterating: Idea[];
+  considering: Idea[];
+  closed: Idea[];
 }
 
 interface KanbanIdeasHook {
