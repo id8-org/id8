@@ -159,9 +159,9 @@ export interface Idea {
   sam?: number;
   som?: number;
   // Iterating stage fields
-  iterating?: any;
+  iterating?: IteratingStage;
   // Considering stage fields
-  considering?: any;
+  considering?: ConsideringStage;
 }
 
 export interface DeepDiveSection {
@@ -306,9 +306,11 @@ export interface Config {
 }
 
 // Helper to robustly extract ideas array from API response
-function extractIdeasArray(res: any): Idea[] {
+function extractIdeasArray(res: unknown): Idea[] {
   if (Array.isArray(res)) return res;
-  if (res && Array.isArray(res.ideas)) return res.ideas;
+  if (res && typeof res === 'object' && 'ideas' in res && Array.isArray((res as any).ideas)) {
+    return (res as any).ideas;
+  }
   return [];
 }
 

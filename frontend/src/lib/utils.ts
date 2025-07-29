@@ -28,12 +28,12 @@ export function snakeToCamel(str: string): string {
 }
 
 // Recursively converts all object keys from camelCase to snake_case
-export function toSnakeCase(obj: any): any {
+export function toSnakeCase(obj: unknown): unknown {
   if (Array.isArray(obj)) {
     return obj.map(toSnakeCase);
   } else if (obj !== null && typeof obj === 'object') {
     return Object.fromEntries(
-      Object.entries(obj).map(([key, value]) => [
+      Object.entries(obj as Record<string, unknown>).map(([key, value]) => [
         camelToSnake(key),
         toSnakeCase(value)
       ])
@@ -43,12 +43,12 @@ export function toSnakeCase(obj: any): any {
 }
 
 // Recursively converts all object keys from snake_case to camelCase
-export function toCamelCase(obj: any): any {
+export function toCamelCase(obj: unknown): unknown {
   if (Array.isArray(obj)) {
     return obj.map(toCamelCase);
   } else if (obj !== null && typeof obj === 'object') {
     return Object.fromEntries(
-      Object.entries(obj).map(([key, value]) => [
+      Object.entries(obj as Record<string, unknown>).map(([key, value]) => [
         snakeToCamel(key),
         toCamelCase(value)
       ])
