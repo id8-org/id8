@@ -89,7 +89,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (token) {
         try {
-          const response = await api.get('/auth/me');
+          const response = await api.get('api/auth/me');
           setUser(response.data);
           setConfig(response.data.config || null);
         } catch (error) {
@@ -111,7 +111,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       formData.append('username', email); // Backend expects 'username' field
       formData.append('password', password);
       
-      const response = await api.post('/auth/login', formData, {
+      const response = await api.post('api/auth/login', formData, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
@@ -124,7 +124,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       refreshApiAuthHeader();
       
       // Fetch user data
-      const userResponse = await api.get('/api/auth/me'); // Changed endpoint
+      const userResponse = await api.get('api/auth/me'); // Changed endpoint
       setUser(userResponse.data);
       setConfig(userResponse.data.config || null);
     } catch (error: unknown) {
@@ -138,7 +138,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('token', access_token);
       setToken(access_token);
       refreshApiAuthHeader(access_token); // Important!
-      const response = await api.get('/api/auth/me');
+      const response = await api.get('api/auth/me');
       setUser(response.data);
       localStorage.setItem('user', JSON.stringify(response.data));
       await getProfile();
@@ -154,7 +154,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (email: string, password: string, firstName: string, lastName: string) => {
     try {
-      const response = await api.post('/auth/register', {
+      const response = await api.post('api/auth/register', {
         email,
         password,
         first_name: firstName,
@@ -168,7 +168,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       refreshApiAuthHeader();
       
       // Fetch user data
-      const userResponse = await api.get('/auth/me');
+      const userResponse = await api.get('api/auth/me');
       setUser(userResponse.data);
       setConfig(userResponse.data.config || null);
     } catch (error: unknown) {
@@ -186,7 +186,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const updateProfile = async (profileData: Partial<UserProfile>) => {
     try {
-      const response = await api.put('/auth/profile', toSnakeCase(profileData));
+      const response = await api.put('api/auth/profile', toSnakeCase(profileData));
       setUser(prev => prev ? { ...prev, profile: toCamelCase(response.data) } : null);
       // Optionally refresh config if profile update can affect it
       const userResponse = await api.get('/auth/me');
@@ -198,7 +198,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const getProfile = async (): Promise<UserProfile | null> => {
     try {
-      const response = await api.get('/auth/profile');
+      const response = await api.get('api/auth/profile');
       setConfig(response.data.config || null);
       return toCamelCase(response.data.profile);
     } catch (error: any) {
@@ -212,7 +212,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const refreshUser = async () => {
     setIsLoading(true);
     try {
-      const res = await api.get('/auth/me');
+      const res = await api.get('api/auth/me');
       setUser(res.data);
     } catch (e) {
       setUser(null);

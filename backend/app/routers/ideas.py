@@ -525,10 +525,16 @@ async def generate_ideas(
                     logger.info(f"[LLM] Raw LLM response: {str(results)[:1000]}")
                     ideas = []
                     for result in results:
-                        for idea in result.get('ideas', []):
-                            if ('error' not in idea or idea['error'] is None) and idea not in ideas:
-                                ideas.append(idea)
-                    result = results[0]  # For raw/matched_repo fields
+                        # Assuming each 'result' is a dictionary
+                        if isinstance(result, dict):
+                            for idea in result.get('ideas', []):
+                                if ('error' not in idea or idea['error'] is None) and idea not in ideas:
+                                    ideas.append(idea)
+                        else:
+                            logger.error(f"[LLM] Unexpected result type: {type(result)}, value: {result}")
+                    matched_repo_from_result = None
+                    if results and isinstance(results[0], dict):
+                        matched_repo_from_result = results[0].get('matched_repo') # Get matched_repo from the first result
                 else:
                     # User-only (AI) prompt: two parallel calls with slight variations
                     context['prompt_type'] = 'ai'
@@ -544,10 +550,15 @@ async def generate_ideas(
                     logger.info(f"[LLM] Raw LLM response: {str(results)[:1000]}")
                     ideas = []
                     for result in results:
-                        for idea in result.get('ideas', []):
-                            if ('error' not in idea or idea['error'] is None) and idea not in ideas:
-                                ideas.append(idea)
-                    result = results[0]
+                        # Assuming each 'result' is a dictionary
+                        if isinstance(result, dict):
+                            for idea in result.get('ideas', []):
+                                if ('error' not in idea or idea['error'] is None) and idea not in ideas:
+                                    ideas.append(idea)
+                        else:
+                            logger.error(f"[LLM] Unexpected result type: {type(result)}, value: {result}")
+                    matched_repo_from_result = None
+                
             except ValueError as ve:
                 logger.error(f"[LLM] Exception during personalized LLM call: {ve}\n{traceback.format_exc()}")
                 raise HTTPException(status_code=400, detail=str(ve))
@@ -562,15 +573,19 @@ async def generate_ideas(
             logger.info(f"[LLM] Raw LLM response: {str(results)[:1000]}")
             ideas = []
             for result in results:
-                for idea in result.get('ideas', []):
-                    if ('error' not in idea or idea['error'] is None) and idea not in ideas:
-                        ideas.append(idea)
-            result = results[0]
+                # Assuming each 'result' is a dictionary
+                if isinstance(result, dict):
+                    for idea in result.get('ideas', []):
+                        if ('error' not in idea or idea['error'] is None) and idea not in ideas:
+                            ideas.append(idea)
+                else:
+                    logger.error(f"[LLM] Unexpected result type: {type(result)}, value: {result}")
+            matched_repo_from_result = None
         logger.info(f"[LLM] Parsed LLM ideas: {str(ideas)[:1000]}")
         if ideas is None or len(ideas) == 0:
             # Always return a 200 with an empty list if no ideas generated
             logger.warning(f"[API] No ideas generated for user {current_user.id}")
-            return {"ideas": [], "config": config, "matched_repo": result.get('matched_repo') if request.use_personalization else None}
+            return {"ideas": [], "config": config, "matched_repo": matched_repo_from_result if request.use_personalization else None}
         logger.info(f"[API] Parsed {len(ideas)} ideas for user {current_user.id}")
         saved_ideas = []
         idea_warnings = []  # <-- Collect warnings for each idea
@@ -614,14 +629,16 @@ async def generate_ideas(
         return {
             "ideas": filtered_ideas,
             "config": config,
-            "matched_repo": result.get('matched_repo') if request.use_personalization else None,
+            "matched_repo": matched_repo_from_result if request.use_personalization else None,
             "idea_warnings": idea_warnings
         }
     except HTTPException as he:
-        raise he
+        raise hecs
     except Exception as e:
         logger.error(f"[API] Exception in /ideas/generate: {e}\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Failed to generate ideas: {str(e)}")
+
+
 
 @router.get("/{idea_id}", response_model=IdeaOut)
 def get_idea_by_id(idea_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_active_user)):
