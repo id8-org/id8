@@ -48,7 +48,7 @@ const displayValue = (val?: number | null) =>
 const getStageColor = (stage: Stage) => {
   switch (stage) {
     case 'suggested': return 'bg-blue-100 text-blue-700';
-    case 'deep-dive': return 'bg-purple-100 text-purple-700';
+    case 'deep_dive': return 'bg-purple-100 text-purple-700';
     case 'iterating': return 'bg-orange-100 text-orange-700';
     case 'considering': return 'bg-green-100 text-green-700';
     case 'closed': return 'bg-gray-100 text-gray-700';
@@ -59,7 +59,7 @@ const getStageColor = (stage: Stage) => {
 const getStageLabel = (stage: Stage) => {
   switch (stage) {
     case 'suggested': return 'Suggested';
-    case 'deep-dive': return 'Deep Dive';
+    case 'deep_dive': return 'Deep Dive';
     case 'iterating': return 'Iterating';
     case 'considering': return 'Considering';
     case 'closed': return 'Closed';
@@ -70,7 +70,7 @@ const getStageLabel = (stage: Stage) => {
 const mapStatusToStage = (status: string): Stage => {
   switch (status) {
     case 'deep_dive':
-      return 'deep-dive';
+      return 'deep_dive';
     case 'iterating':
       return 'iterating';
     case 'considering':
@@ -189,7 +189,7 @@ const UnifiedIdeaCard: React.FC<UnifiedIdeaCardProps> = ({
         )}
 
         {/* Deep Dive summary for Deep Dive stage */}
-        {currentStage === 'deep-dive' && (
+        {currentStage === 'deep_dive' && (
           idea.deep_dive && Object.keys(idea.deep_dive).length > 0 ? (
             <div className="mt-2">
               {idea.deep_dive?.overall_score !== undefined && (
@@ -226,7 +226,7 @@ const UnifiedIdeaCard: React.FC<UnifiedIdeaCardProps> = ({
           </div>
         )}
       </Card>
-      {/* Modal for viewing suggested data from deep-dive or later stages */}
+      {/* Modal for viewing suggested data from deep_dive or later stages */}
       <Dialog open={showSuggestedModal} onOpenChange={setShowSuggestedModal}>
         <DialogContent>
           <DialogHeader>

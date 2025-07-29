@@ -1,7 +1,7 @@
 // Centralized utility for mapping backend Idea objects to frontend ProjectData shape
 import type { Idea } from '@/lib/api';
 
-export type Stage = 'suggested' | 'deep-dive' | 'iterating' | 'considering' | 'closed';
+export type Stage = 'suggested' | 'deep_dive' | 'iterating' | 'considering' | 'closed';
 
 export interface ProjectData {
   id: string;
@@ -96,7 +96,7 @@ export function mapIdeaToProjectData(idea: any): ProjectData | undefined {
   const mapStatusToStage = (status: string): Stage => {
     switch (status) {
       case 'deep_dive':
-        return 'deep-dive';
+        return 'deep_dive';
       case 'iterating':
         return 'iterating';
       case 'considering':
@@ -213,7 +213,7 @@ export function mapIdeaToIdeaModalProps(idea: any) {
   const mapStatusToStage = (status: string): Stage => {
     switch (status) {
       case 'deep_dive':
-        return 'deep-dive';
+        return 'deep_dive';
       case 'iterating':
         return 'iterating';
       case 'considering':
@@ -232,7 +232,7 @@ export function mapIdeaToIdeaModalProps(idea: any) {
   if (idea.deep_dive && Object.keys(idea.deep_dive).length > 0) {
     const deepDive = idea.deep_dive;
     stageHistory.push({
-      stage: 'deep-dive',
+      stage: 'deep_dive',
       date: deepDive.created_at || idea.updated_at || idea.created_at,
       notes: deepDive.notes || '',
       // Pass the complete deep dive data structure

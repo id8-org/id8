@@ -407,7 +407,7 @@ export const triggerDeepDive = async (ideaId: string, user?: any): Promise<DeepD
     body.request.user_context = user_context;
   }
   // Always send a JSON object with a 'request' key
-  const response = await api.post(`/api/ideas/${ideaId}/deep-dive`, body);
+  const response = await api.post(`/api/ideas/${ideaId}/deep_dive`, body);
   return response.data;
 };
 
@@ -1290,19 +1290,19 @@ export const deleteSuggested = (id: string) =>
 
 // Deep Dive stage API
 export const createDeepDive = (data: DeepDiveCreate) =>
-  api.post<DeepDive>('/deep-dive/', data);
+  api.post<DeepDive>('/deep_dive/', data);
 
 export const getDeepDiveById = (id: string) =>
-  api.get<DeepDive>(`/deep-dive/${id}`);
+  api.get<DeepDive>(`/deep_dive/${id}`);
 
 export const getDeepDiveByIdeaId = (ideaId: string) =>
-  api.get<DeepDive>(`/deep-dive/idea/${ideaId}`);
+  api.get<DeepDive>(`/deep_dive/idea/${ideaId}`);
 
 export const updateDeepDive = (id: string, data: DeepDiveCreate) =>
-  api.put<DeepDive>(`/deep-dive/${id}`, data);
+  api.put<DeepDive>(`/deep_dive/${id}`, data);
 
 export const deleteDeepDive = (id: string) =>
-  api.delete(`/deep-dive/${id}`);
+  api.delete(`/deep_dive/${id}`);
 
 // Iterating stage API
 export const createIterating = (data: IteratingCreate) =>

@@ -83,7 +83,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                   idea={idea}
                   index={idx}
                   onClick={onCardClick}
-                  loading={stage.key === 'deep-dive' && idea.deep_dive_requested && !idea.deep_dive}
+                  loading={stage.key === 'deep_dive' && idea.deep_dive_requested && !idea.deep_dive}
                 />
               ))}
               {provided.placeholder}

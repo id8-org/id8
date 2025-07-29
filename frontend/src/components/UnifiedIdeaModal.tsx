@@ -86,7 +86,7 @@ const UnifiedIdeaModal: React.FC<UnifiedIdeaModalProps> = ({
   const getStageColor = (stageKey: Stage): string => {
     switch (stageKey) {
       case 'suggested': return 'purple-500';
-      case 'deep-dive': return 'blue-500';
+      case 'deep_dive': return 'blue-500';
       case 'iterating': return 'orange-500';
       case 'considering': return 'green-500';
       case 'closed': return 'gray-400';
@@ -96,11 +96,11 @@ const UnifiedIdeaModal: React.FC<UnifiedIdeaModalProps> = ({
 
   const isStageAvailable = (stageKey: Stage) => {
     if (normalizedIdea.currentStage === 'suggested') {
-      if (stageKey === 'deep-dive') return true;
+      if (stageKey === 'deep_dive') return true;
       if (stageKey === 'suggested') return true;
       return false;
     }
-    const order = ['suggested', 'deep-dive', 'iterating', 'considering', 'closed'];
+    const order = ['suggested', 'deep_dive', 'iterating', 'considering', 'closed'];
     return order.indexOf(stageKey) <= order.indexOf(normalizedIdea.currentStage);
   };
 
@@ -402,8 +402,8 @@ const UnifiedIdeaModal: React.FC<UnifiedIdeaModalProps> = ({
               <TabsList className="grid w-full grid-cols-5">
                 {LIFECYCLE_STAGES.map((stage) => {
                   // Lock tabs for future stages the idea has not yet reached
-                  const order = ['suggested', 'deep-dive', 'iterating', 'considering', 'closed'];
-                  const currentIdx = order.indexOf((normalizedIdea.status || 'suggested').replace('_', '-'));
+                  const order = ['suggested', 'deep_dive', 'iterating', 'considering', 'closed'];
+                  const currentIdx = order.indexOf((normalizedIdea.status || 'suggested'));
                   const stageIdx = order.indexOf(stage.key);
                   const isLocked = stageIdx > currentIdx;
                   return (
@@ -489,7 +489,7 @@ const UnifiedIdeaModal: React.FC<UnifiedIdeaModalProps> = ({
               {/* Deep Dive Tab */}
               {/* Only render the Deep Dive tab if the idea is at or past the deep dive stage */}
               {(normalizedIdea.status === 'deep_dive' || normalizedIdea.status === 'iterating' || normalizedIdea.status === 'considering' || normalizedIdea.status === 'closed') && (
-                <TabsContent value="deep-dive" className="mt-4" forceMount>
+                <TabsContent value="deep_dive" className="mt-4" forceMount>
                   {/* Summary and Go/No-Go at the top, full width */}
                   <div className="w-full mb-4">
                     <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
