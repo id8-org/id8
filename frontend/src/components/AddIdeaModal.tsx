@@ -15,6 +15,7 @@ import { BUSINESS_MODEL_GROUPS, BUSINESS_HORIZONTAL_GROUPS, BUSINESS_VERTICAL_GR
 import UnifiedIdeaModal from './UnifiedIdeaModal';
 import type { Idea } from '@/lib/api';
 import { getShortlist, addToShortlist, removeFromShortlist } from '../lib/api';
+import { features } from 'process';
 
 const INDUSTRIES = ["Technology", "Healthcare", "Finance", "Education", "Entertainment", "Retail", "Travel"];
 const BUSINESS_MODELS = ["SaaS", "Marketplace", "E-commerce", "API as a Service", "Open Source"];
@@ -162,27 +163,37 @@ export const AddIdeaModal = ({ isOpen, onClose, onIdeaCreated, refreshIdeas }: A
     try {
       // Use the same generate endpoint as AI-suggested ideas, but with BYOI context
       // This ensures both flows use the same backend logic
-      const res = await api.post('/api/ideas/byoi', {
+      const res = await api.post('/api/ideas/generate', {
         industry: '', // Let the AI infer from context
         business_model: '',
         vertical: '',
         horizontal: '',
-        context: `User provided idea: Title: ${userIdea.title}. Hook: ${userIdea.hook || 'Not provided'}. Value: ${userIdea.value || 'Not provided'}. Evidence: ${userIdea.evidence || 'Not provided'}. Differentiator: ${userIdea.differentiator || 'Not provided'}. Call to Action: ${userIdea.call_to_action || 'Not provided'}.`,
-        use_personalization: usePersonalization,
-        flow_type: 'byoi',
-        user_idea_data: {
-          title: userIdea.title,
-          hook: userIdea.hook || '',
-          value: userIdea.value || '',
-          evidence: userIdea.evidence || '',
-          differentiator: userIdea.differentiator || '',
-          call_to_action: userIdea.call_to_action || '',
-          source_type: 'byoi',
-          status: 'deep_dive',
-          problem_statement: userIdea.hook || '', // Use hook as problem statement if available
-          elevator_pitch: `${userIdea.title}: ${userIdea.value || userIdea.hook || ''}`,
-        },
+        context: '',
+        use_personalization: false,
+        flow_type: 'byoi', // Still needed for config/auth checks
+        user_idea_data: userIdea, // Send the user-provided idea data
       });
+      setLoading(false);
+      onClose();
+      if (res.data.ideas && res.data.ideas.length > 0) {
+        toast({
+          title: 'Idea added',
+          description: 'Your idea has been successfully added.',
+        });
+      } else {
+        toast({
+          title: 'No ideas added',
+          description: 'Failed to add your idea.',
+        });
+      }
+    } catch (error) {
+      setLoading(false);
+      toast({
+        title: 'Error',
+        description: 'Failed to add your idea. Please try again.',
+      });
+    }
+  };
       
       const newIdeas = res.data?.ideas || [];
       if (newIdeas.length > 0) {

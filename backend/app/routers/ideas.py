@@ -414,11 +414,15 @@ SUGGESTED_FIELDS = [
 def filter_suggested_fields(idea_dict):
     return {k: v for k, v in idea_dict.items() if k in SUGGESTED_FIELDS and v not in (None, '', [], {})}
 
+from typing import Optional, Dict, Any
+from fastapi import Body
+
 @router.post("/generate")
 async def generate_ideas(
     request: IdeaGenerationRequest,
     current_user: User = Depends(get_current_user_or_api),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user_idea_data: Optional[Dict[str, Any]] = Body(None)  # Add optional user_idea_data
 ):
     tier_config = get_tier_config(str(current_user.tier))
     account_type_config = get_account_type_config(str(current_user.account_type))
@@ -476,11 +480,11 @@ async def generate_ideas(
         logger.info(f"[LLM PAYLOAD] Full context sent to LLM for idea generation: {json.dumps(context, indent=2, default=str)[:4000]}")
         
         # Handle BYOI (Bring Your Own Idea) flow
-        if request.flow_type == 'byoi' and request.user_idea_data:
-            logger.info(f"[BYOI] Processing user-provided idea: {request.user_idea_data}")
+        if request.flow_type == 'byoi' or user_idea_data:
+            logger.info(f"[BYOI] Processing user-provided idea: {user_idea_data}")
             try:
                 # Clean and validate user idea data
-                user_idea = ensure_idea_fields(request.user_idea_data)
+                user_idea = ensure_idea_fields(user_idea_data)
                 
                 # Create idea directly from user input
                 db_idea = create_idea_from_dict(user_idea, str(current_user.id))
@@ -633,7 +637,7 @@ async def generate_ideas(
             "idea_warnings": idea_warnings
         }
     except HTTPException as he:
-        raise hecs
+        raise he
     except Exception as e:
         logger.error(f"[API] Exception in /ideas/generate: {e}\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Failed to generate ideas: {str(e)}")
@@ -658,89 +662,7 @@ def get_idea_by_id(idea_id: str, db: Session = Depends(get_db), current_user: Us
         raise HTTPException(status_code=403, detail="Not authorized to access this idea")
     return safe_idea_out(idea)
 
-@router.post("/byoi", response_model=IdeaOut)
-async def create_idea(
-    title: str = Body(...),
-    hook: Optional[str] = Body(None),
-    value: Optional[str] = Body(None),
-    evidence: Optional[str] = Body(None),
-    differentiator: Optional[str] = Body(None),
-    score: Optional[int] = Body(None),
-    mvp_effort: Optional[int] = Body(None),
-    type: Optional[str] = Body(None),
-    status: str = Body("deep_dive"),
-    repo_id: Optional[str] = Body(None),
-    current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
-):
-    # Clean up all user-typed fields
-    title = await clean_text_with_llm(title) if title else title
-    hook = await clean_text_with_llm(hook) if hook else hook
-    value = await clean_text_with_llm(value) if value else value
-    evidence = await clean_text_with_llm(evidence) if evidence else evidence
-    differentiator = await clean_text_with_llm(differentiator) if differentiator else differentiator
-    score = score if score is not None else 0
-    mvp_effort = mvp_effort if mvp_effort is not None else 0
-    type = type if type is not None else "side_hustle"
-    idea_data = {
-        "title": title,
-        "hook": hook,
-        "value": value,
-        "evidence": evidence,
-        "differentiator": differentiator,
-        "score": score,
-        "mvp_effort": mvp_effort,
-        "type": type,
-    }
-    required_fields = ["title", "hook", "value", "evidence", "differentiator", "score", "mvp_effort", "type"]
-    needs_enrichment = any(not idea_data.get(f) for f in required_fields)
-    enriched = idea_data.copy()
-    llm_raw = None
-    if needs_enrichment:
-        enrichment_context = f"User idea: {title or ''}\n{hook or ''}\n{value or ''}\n{evidence or ''}\n{differentiator or ''}"
-        llm_result = await generate_idea_pitches({
-            'custom_context': enrichment_context
-        })
-        ideas = llm_result.get("ideas", [])
-        if ideas:
-            enriched = {**enriched, **ideas[0]}
-            llm_raw = llm_result.get("raw")
-    enriched = ensure_idea_fields(enriched)
-    # Enforce unique idea name per user/team (must stay inside endpoint, never at module scope)
-    existing_names = set(i.title.lower() for i in db.query(Idea).filter(Idea.user_id == current_user.id).all())
-    base_name = enriched.get('title', title)
-    hook_for_name = enriched.get('hook') or enriched.get('description') or ''
-    unique_title = make_unique_idea_name(base_name, hook_for_name, existing_names)
-    idea = Idea(
-        user_id=current_user.id,
-        title=unique_title,
-        hook=enriched.get("hook", hook),
-        value=enriched.get("value", value),
-        evidence=enriched.get("evidence", evidence),
-        differentiator=enriched.get("differentiator", differentiator),
-        score=enriched.get("score", score),
-        mvp_effort=enriched.get("mvp_effort", mvp_effort),
-        type=enriched.get("type", type),
-        status=status,
-        repo_id=repo_id,
-        evidence_reference=enriched.get("evidence_reference", evidence),
-        repo_usage=enriched.get("repo_usage", evidence),
-        assumptions=enriched.get("assumptions", []),
-        source_type="byoi",
-        llm_raw_response=llm_raw,
-        scope_commitment=enriched.get("scope_commitment"),
-        problem_statement=enriched.get("problem_statement"),
-        elevator_pitch=enriched.get("elevator_pitch"),
-        core_assumptions=enriched.get("core_assumptions"),
-        riskiest_assumptions=enriched.get("riskiest_assumptions"),
-        generation_notes=enriched.get("generation_notes"),
-    )
-    db.add(idea)
-    db.commit()
-    db.refresh(idea)
-    logger.info(f"[API] Saved idea {idea.id} (idea_number={idea.idea_number}) for user {idea.user_id}")
-    log_and_emit_audit(db, current_user.id, 'idea_created', 'idea', idea.id, idea.as_dict())
-    return idea
+
 
 @router.post("/validate")
 async def validate_user_idea(
