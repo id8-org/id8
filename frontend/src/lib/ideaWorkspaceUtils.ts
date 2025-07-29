@@ -3,9 +3,8 @@
 
 import type { Idea as NormalizedIdea } from '../types/idea';
 import type { IdeaStatus } from '../lib/api';
+import type { Stage } from '../types/index';
 import { triggerDeepDive, triggerIterationTasks, triggerConsiderationTasks, triggerClosureTasks } from '../lib/api';
-
-export type Stage = 'suggested' | 'deep_dive' | 'iterating' | 'considering' | 'closed';
 
 // Utility to map backend status to Stage
 export function mapStatusToStage(status: string): Stage {

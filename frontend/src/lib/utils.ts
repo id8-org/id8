@@ -115,3 +115,62 @@ export function getTrendLabel(slope: number, threshold = 0.05) {
   if (slope < -threshold) return 'Declining';
   return 'Stable';
 }
+
+/**
+ * Safe display value that shows em dash for null/undefined values
+ */
+export function displayValue(val?: number | null): string | number {
+  return val != null ? val : '\u2014';
+}
+
+/**
+ * Get stage color classes consistently across components
+ */
+export function getStageColor(stage: string): string {
+  switch (stage) {
+    case 'suggested': return 'bg-blue-100 text-blue-700';
+    case 'deep_dive': return 'bg-purple-100 text-purple-700';
+    case 'iterating': return 'bg-orange-100 text-orange-700';
+    case 'considering': return 'bg-green-100 text-green-700';
+    case 'closed': return 'bg-gray-100 text-gray-700';
+    default: return 'bg-slate-100 text-slate-700';
+  }
+}
+
+/**
+ * Get stage label consistently across components
+ */
+export function getStageLabel(stage: string): string {
+  switch (stage) {
+    case 'suggested': return 'Suggested';
+    case 'deep_dive': return 'Deep Dive';
+    case 'iterating': return 'Iterating';
+    case 'considering': return 'Considering';
+    case 'closed': return 'Closed';
+    default: return 'Unknown';
+  }
+}
+
+/**
+ * Clean text by removing trailing ellipsis
+ */
+export function cleanText(text: string): string {
+  return text.replace(/\.\.\.$/, '');
+}
+
+/**
+ * Get source type label consistently across components
+ */
+export function getSourceTypeLabel(type?: string | null): string {
+  switch (type) {
+    case 'byoi': return 'BYOI';
+    case 'system': return 'System Generated';
+    case 'madlib': return 'AI Generated';
+    case 'not_set':
+    case undefined:
+    case null:
+      return 'Not Set';
+    default:
+      return type ? type.charAt(0).toUpperCase() + type.slice(1) : 'Not Set';
+  }
+}

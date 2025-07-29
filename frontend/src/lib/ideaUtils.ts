@@ -1,7 +1,6 @@
 // Centralized utility for mapping backend Idea objects to frontend ProjectData shape
 import type { Idea } from '@/lib/api';
-
-export type Stage = 'suggested' | 'deep_dive' | 'iterating' | 'considering' | 'closed';
+import type { Stage } from '@/types/index';
 
 export interface ProjectData {
   id: string;
