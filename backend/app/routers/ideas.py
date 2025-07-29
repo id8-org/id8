@@ -658,7 +658,7 @@ def get_idea_by_id(idea_id: str, db: Session = Depends(get_db), current_user: Us
         raise HTTPException(status_code=403, detail="Not authorized to access this idea")
     return safe_idea_out(idea)
 
-@router.post("/", response_model=IdeaOut)
+@router.post("/byoi", response_model=IdeaOut)
 async def create_idea(
     title: str = Body(...),
     hook: Optional[str] = Body(None),

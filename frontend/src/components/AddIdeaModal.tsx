@@ -162,7 +162,7 @@ export const AddIdeaModal = ({ isOpen, onClose, onIdeaCreated, refreshIdeas }: A
     try {
       // Use the same generate endpoint as AI-suggested ideas, but with BYOI context
       // This ensures both flows use the same backend logic
-      const res = await api.post('/api/ideas/generate', {
+      const res = await api.post('/api/ideas/byoi', {
         industry: '', // Let the AI infer from context
         business_model: '',
         vertical: '',

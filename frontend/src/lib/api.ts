@@ -159,9 +159,9 @@ export interface Idea {
   sam?: number;
   som?: number;
   // Iterating stage fields
-  iterating?: IteratingStage;
+  iterating?: Iterating;
   // Considering stage fields
-  considering?: ConsideringStage;
+  considering?: Considering;
 }
 
 export interface DeepDiveSection {
@@ -218,7 +218,7 @@ export interface DeepDiveVersion {
 // API Functions
 export const getRepos = async (lang?: string, search?: string, period?: string) => {
   try {
-    const response = await api.get('/repos/', { 
+    const response = await api.get('/api/repos/', { 
       params: { 
         language: lang, 
         search,
@@ -234,7 +234,7 @@ export const getRepos = async (lang?: string, search?: string, period?: string) 
 
 export const getRepoStats = async () => {
   try {
-    const response = await api.get('/repos/stats');
+    const response = await api.get('/api/repos/stats');
     return response.data;
   } catch (error: unknown) {
     console.error('Error fetching repo stats:', error);
@@ -244,7 +244,7 @@ export const getRepoStats = async () => {
 
 export const getRepoHealth = async () => {
   try {
-    const response = await api.get('/repos/health');
+    const response = await api.get('/api/repos/health');
     return response.data;
   } catch (error: unknown) {
     console.error('Error fetching repo health:', error);
@@ -254,7 +254,7 @@ export const getRepoHealth = async () => {
 
 export const loadTrendingRepos = async (period: string = 'daily', languages?: string) => {
   try {
-    const response = await api.post('/repos/load', null, {
+    const response = await api.post('/api/repos/load', null, {
       params: {
         period,
         languages
@@ -269,7 +269,7 @@ export const loadTrendingRepos = async (period: string = 'daily', languages?: st
 
 export const refreshTrendingRepos = async (period: string = 'daily', languages?: string) => {
   try {
-    const response = await api.post('/repos/refresh', null, {
+    const response = await api.post('/api/repos/refresh', null, {
       params: {
         period,
         languages
@@ -508,7 +508,7 @@ export const generateROIProjections = async (ideaId: string) => {
 
 export const getStats = async () => {
   try {
-    const response = await api.get('/admin/stats');
+    const response = await api.get('/api/admin/stats');
     return response.data;
   } catch (error) {
     console.error('Error fetching stats:', error);
@@ -636,7 +636,7 @@ export async function fetchIdeas(repoId: string): Promise<Idea[]> {
 }
 
 export async function fetchLastUpdated() {
-  const res = await fetch('/ideas/last-updated');
+  const res = await fetch('/api/ideas/last-updated');
   const data = await res.json();
   return data.last_updated;
 }
@@ -660,7 +660,7 @@ export const updateIdea = async (ideaId: string, updates: Record<string, any>): 
 
 export const clearRepoCache = async () => {
   try {
-    const response = await api.post('/repos/clear-cache');
+    const response = await api.post('/api/repos/clear-cache');
     return response.data;
   } catch (error) {
     console.error('Error clearing repo cache:', error);
@@ -746,7 +746,7 @@ export interface InvestorDeck {
 // Case Study API
 export const generateCaseStudy = async (ideaId: string, companyName?: string): Promise<{ case_study: CaseStudy; llm_raw_response: string }> => {
   try {
-    const response = await api.post('/advanced/case-study', {
+    const response = await api.post('/api/advanced/case-study', {
       idea_id: ideaId,
       company_name: companyName
     });
@@ -759,7 +759,7 @@ export const generateCaseStudy = async (ideaId: string, companyName?: string): P
 
 export const getCaseStudy = async (ideaId: string): Promise<{ case_study: CaseStudy; llm_raw_response: string }> => {
   try {
-    const response = await api.get(`/advanced/case-study/${ideaId}`);
+    const response = await api.get(`/api/advanced/case-study/${ideaId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching case study:', error);
@@ -770,7 +770,7 @@ export const getCaseStudy = async (ideaId: string): Promise<{ case_study: CaseSt
 // Market Snapshot API
 export const generateMarketSnapshot = async (ideaId: string): Promise<{ market_snapshot: MarketSnapshot; llm_raw_response: string }> => {
   try {
-    const response = await api.post('/advanced/market-snapshot', {
+    const response = await api.post('/api/advanced/market-snapshot', {
       idea_id: ideaId
     });
     return response.data;
@@ -782,7 +782,7 @@ export const generateMarketSnapshot = async (ideaId: string): Promise<{ market_s
 
 export const getMarketSnapshot = async (ideaId: string): Promise<{ market_snapshot: MarketSnapshot; llm_raw_response: string }> => {
   try {
-    const response = await api.get(`/advanced/market-snapshot/${ideaId}`);
+    const response = await api.get(`/api/advanced/market-snapshot/${ideaId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching market snapshot:', error);
@@ -793,7 +793,7 @@ export const getMarketSnapshot = async (ideaId: string): Promise<{ market_snapsh
 // Lens Insights API
 export const generateLensInsight = async (ideaId: string, lensType: string): Promise<{ lens_insight: LensInsight; llm_raw_response: string }> => {
   try {
-    const response = await api.post('/advanced/lens-insight', {
+    const response = await api.post('api/advanced/lens-insight', {
       idea_id: ideaId,
       lens_type: lensType
     });
@@ -806,7 +806,7 @@ export const generateLensInsight = async (ideaId: string, lensType: string): Pro
 
 export const getLensInsights = async (ideaId: string): Promise<{ lens_insights: LensInsight[]; llm_raw_responses: Record<string, string> }> => {
   try {
-    const response = await api.get(`/advanced/lens-insights/${ideaId}`);
+    const response = await api.get(`api/advanced/lens-insights/${ideaId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching lens insights:', error);
@@ -817,7 +817,7 @@ export const getLensInsights = async (ideaId: string): Promise<{ lens_insights: 
 // VC Thesis Comparison API
 export const generateVCThesisComparison = async (ideaId: string, vcFirm?: string): Promise<{ vc_thesis_comparison: VCThesisComparison; llm_raw_response: string }> => {
   try {
-    const response = await api.post('/advanced/vc-thesis-comparison', {
+    const response = await api.post('/api/advanced/vc-thesis-comparison', {
       idea_id: ideaId,
       vc_firm: vcFirm
     });
@@ -830,7 +830,7 @@ export const generateVCThesisComparison = async (ideaId: string, vcFirm?: string
 
 export const getVCThesisComparisons = async (ideaId: string): Promise<{ vc_thesis_comparisons: VCThesisComparison[]; llm_raw_responses: Record<string, string> }> => {
   try {
-    const response = await api.get(`/advanced/vc-thesis-comparisons/${ideaId}`);
+    const response = await api.get(`/api/advanced/vc-thesis-comparisons/${ideaId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching VC thesis comparisons:', error);
@@ -847,7 +847,7 @@ export const generateInvestorDeck = async (
   focusArea: string = "general"
 ): Promise<{ investor_deck: InvestorDeck; llm_raw_response: string }> => {
   try {
-    const response = await api.post('/advanced/investor-deck', {
+    const response = await api.post('/api/advanced/investor-deck', {
       idea_id: ideaId,
       include_case_studies: includeCaseStudies,
       include_market_analysis: includeMarketAnalysis,
@@ -863,7 +863,7 @@ export const generateInvestorDeck = async (
 
 export const getInvestorDeck = async (ideaId: string): Promise<{ investor_deck: InvestorDeck; llm_raw_response: string }> => {
   try {
-    const response = await api.get(`/advanced/investor-deck/${ideaId}`);
+    const response = await api.get(`/api/advanced/investor-deck/${ideaId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching investor deck:', error);
@@ -882,17 +882,17 @@ export interface IdeaCollaborator {
 }
 
 export const addCollaborator = async (ideaId: string, userId: string, role: 'editor' | 'viewer'): Promise<IdeaCollaborator> => {
-  const response = await api.post(`/collaboration/ideas/${ideaId}/collaborators`, { user_id: userId, role });
+  const response = await api.post(`/api/collaboration/ideas/${ideaId}/collaborators`, { user_id: userId, role });
   return response.data;
 };
 
 export const getCollaborators = async (ideaId: string): Promise<IdeaCollaborator[]> => {
-  const response = await api.get(`/collaboration/ideas/${ideaId}/collaborators`);
+  const response = await api.get(`/api/collaboration/ideas/${ideaId}/collaborators`);
   return response.data;
 };
 
 export const removeCollaborator = async (ideaId: string, userId: string): Promise<void> => {
-  await api.delete(`/collaboration/ideas/${ideaId}/collaborators/${userId}`);
+  await api.delete(`/api/collaboration/ideas/${ideaId}/collaborators/${userId}`);
 };
 
 // Change Proposal API
@@ -922,17 +922,17 @@ export const submitChangeProposal = async (ideaId: string, changes: Partial<Idea
 };
 
 export const getChangeProposals = async (ideaId: string): Promise<IdeaChangeProposal[]> => {
-  const response = await api.get(`/collaboration/ideas/${ideaId}/proposals`);
+  const response = await api.get(`/api/collaboration/ideas/${ideaId}/proposals`);
   return response.data;
 };
 
 export const approveChangeProposal = async (proposalId: string): Promise<IdeaChangeProposal> => {
-  const response = await api.post(`/collaboration/proposals/${proposalId}/approve`);
+  const response = await api.post(`/api/collaboration/proposals/${proposalId}/approve`);
   return response.data;
 };
 
 export const rejectChangeProposal = async (proposalId: string): Promise<IdeaChangeProposal> => {
-  const response = await api.post(`/collaboration/proposals/${proposalId}/reject`);
+  const response = await api.post(`/api/collaboration/proposals/${proposalId}/reject`);
   return response.data;
 };
 
@@ -948,12 +948,12 @@ export interface Comment {
 }
 
 export const addComment = async (ideaId: string, content: string, parentCommentId?: string): Promise<Comment> => {
-  const response = await api.post(`/collaboration/ideas/${ideaId}/comments`, { content, parent_comment_id: parentCommentId });
+  const response = await api.post(`/api/collaboration/ideas/${ideaId}/comments`, { content, parent_comment_id: parentCommentId });
   return response.data;
 };
 
 export const getComments = async (ideaId: string): Promise<Comment[]> => {
-  const response = await api.get(`/collaboration/ideas/${ideaId}/comments`);
+  const response = await api.get(`/api/collaboration/ideas/${ideaId}/comments`);
   return response.data;
 };
 
@@ -966,19 +966,19 @@ export const deleteIdea = async (ideaId: string): Promise<void> => {
 export const uploadResume = async (file: File) => {
   const formData = new FormData();
   formData.append('file', file);
-  const response = await api.post('/resume/upload', formData, {
+  const response = await api.post('/api/resume/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return response.data;
 };
 
 export const processResume = async () => {
-  const response = await api.post('/resume/process');
+  const response = await api.post('/api/resume/process');
   return response.data;
 };
 
 export async function removeResume() {
-  return api.delete('/resume');
+  return api.delete('/api/resume');
 }
 
 // Team & Invite API
@@ -1002,28 +1002,28 @@ export interface Invite {
 }
 
 export const getTeamMembersAndInvites = async (): Promise<{ members: any[]; invites: Invite[] }> => {
-  const response = await api.get('/auth/team/members');
+  const response = await api.get('/api/auth/team/members');
   return response.data;
 };
 
 export const sendTeamInvite = async (email: string): Promise<Invite> => {
   // This is handled via onboarding or a dedicated endpoint (not shown in backend, but assumed as POST /auth/invite)
-  const response = await api.post('/auth/invite', { email });
+  const response = await api.post('/api/auth/invite', { email });
   return response.data;
 };
 
 export const acceptInvite = async (inviteId: string): Promise<any> => {
-  const response = await api.post(`/auth/invite/accept?invite_id=${inviteId}`);
+  const response = await api.post(`/api/auth/invite/accept?invite_id=${inviteId}`);
   return response.data;
 };
 
 export const revokeInvite = async (inviteId: string): Promise<any> => {
-  const response = await api.post(`/auth/invite/revoke?invite_id=${inviteId}`);
+  const response = await api.post(`/api/auth/invite/revoke?invite_id=${inviteId}`);
   return response.data;
 };
 
 export const transferTeamOwnership = async (newOwnerId: string): Promise<any> => {
-  const response = await api.post(`/auth/team/transfer_ownership?new_owner_id=${newOwnerId}`);
+  const response = await api.post(`/api/auth/team/transfer_ownership?new_owner_id=${newOwnerId}`);
   return response.data;
 };
 
@@ -1098,7 +1098,7 @@ export interface AuditStats {
 }
 
 export const logAuditEvent = async (auditData: AuditLogData): Promise<AuditLogEntry> => {
-  const response = await api.post('/audit/log', auditData);
+  const response = await api.post('/api/audit/log', auditData);
   return response.data;
 };
 
@@ -1128,12 +1128,12 @@ export async function getAuditHistory(params: GetAuditHistoryParams = {}): Promi
 
 // --- Ask AI: Profile-level QnA ---
 export async function createProfileQnA(question: string, contextFields?: string[]): Promise<ProfileQnA> {
-  const response = await api.post('/auth/api/profile/qna', { question, context_fields: contextFields });
+  const response = await api.post('/api/auth/api/profile/qna', { question, context_fields: contextFields });
   return response.data;
 }
 
 export async function getProfileQnA(): Promise<ProfileQnA[]> {
-  const response = await api.get('/auth/api/profile/qna');
+  const response = await api.get('/api/auth/profile/qna');
   return response.data;
 }
 
@@ -1234,7 +1234,7 @@ export interface ExportRecordCreate {
 }
 
 export const logExport = async (record: ExportRecordCreate): Promise<ExportRecord> => {
-  const response = await api.post('/advanced/exports', record);
+  const response = await api.post('/api/advanced/exports', record);
   return response.data;
 };
 
@@ -1242,12 +1242,12 @@ export const listExports = async (ideaId?: string, recipient?: string): Promise<
   const params: any = {};
   if (ideaId) params.idea_id = ideaId;
   if (recipient) params.recipient = recipient;
-  const response = await api.get('/advanced/exports', { params });
+  const response = await api.get('/api/advanced/exports', { params });
   return response.data;
 };
 
 export const getExport = async (exportId: string): Promise<ExportRecord> => {
-  const response = await api.get(`/advanced/exports/${exportId}`);
+  const response = await api.get(`/api/advanced/exports/${exportId}`);
   return response.data;
 }; 
 
@@ -1276,48 +1276,48 @@ import type {
 
 // Suggested stage API
 export const createSuggested = (data: SuggestedCreate) =>
-  api.post<Suggested>('/advanced/suggested/', data);
+  api.post<Suggested>('/api/advanced/suggested/', data);
 
 export const getSuggestedById = (id: string) =>
-  api.get<Suggested>(`/advanced/suggested/${id}`);
+  api.get<Suggested>(`/api/advanced/suggested/${id}`);
 
 export const getSuggestedByIdeaId = (ideaId: string) =>
-  api.get<Suggested>(`/advanced/suggested/idea/${ideaId}`);
+  api.get<Suggested>(`/api/advanced/suggested/idea/${ideaId}`);
 
 export const updateSuggested = (id: string, data: SuggestedCreate) =>
-  api.put<Suggested>(`/advanced/suggested/${id}`, data);
+  api.put<Suggested>(`/api/advanced/suggested/${id}`, data);
 
 export const deleteSuggested = (id: string) =>
-  api.delete(`/advanced/suggested/${id}`);
+  api.delete(`/api/advanced/suggested/${id}`);
 
 // Deep Dive stage API
 export const createDeepDive = (data: DeepDiveCreate) =>
-  api.post<DeepDive>('/deep_dive/', data);
+  api.post<DeepDive>('/api/deep_dive/', data);
 
 export const getDeepDiveById = (id: string) =>
-  api.get<DeepDive>(`/deep_dive/${id}`);
+  api.get<DeepDive>(`/api/deep_dive/${id}`);
 
 export const getDeepDiveByIdeaId = (ideaId: string) =>
-  api.get<DeepDive>(`/deep_dive/idea/${ideaId}`);
+  api.get<DeepDive>(`/api/deep_dive/idea/${ideaId}`);
 
 export const updateDeepDive = (id: string, data: DeepDiveCreate) =>
-  api.put<DeepDive>(`/deep_dive/${id}`, data);
+  api.put<DeepDive>(`/api/deep_dive/${id}`, data);
 
 export const deleteDeepDive = (id: string) =>
-  api.delete(`/deep_dive/${id}`);
+  api.delete(`/api/deep_dive/${id}`);
 
 // Iterating stage API
 export const createIterating = (data: IteratingCreate) =>
-  api.post<Iterating>('/advanced/iterating/', data);
+  api.post<Iterating>('/api/advanced/iterating/', data);
 
 export const getIteratingById = (id: string) =>
-  api.get<Iterating>(`/advanced/iterating/${id}`);
+  api.get<Iterating>(`/api/advanced/iterating/${id}`);
 
 export const getIteratingByIdeaId = (ideaId: string) =>
-  api.get<Iterating>(`/advanced/iterating/idea/${ideaId}`);
+  api.get<Iterating>(`/api/advanced/iterating/idea/${ideaId}`);
 
 export const updateIterating = (id: string, data: IteratingCreate) =>
-  api.put<Iterating>(`/advanced/iterating/${id}`, data);
+  api.put<Iterating>(`/api/advanced/iterating/${id}`, data);
 
 export const deleteIterating = (id: string) =>
-  api.delete(`/advanced/iterating/${id}`); 
+  api.delete(`/api/advanced/iterating/${id}`); 
