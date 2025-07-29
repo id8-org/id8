@@ -367,7 +367,7 @@ export function IdeaWorkspace({
   // Group ideas by status for kanban columns using Stage
   const ideasByStatus: Record<Stage, NormalizedIdea[]> = {
     suggested: [],
-    'deep-dive': [],
+    deep_dive: [],
     iterating: [],
     considering: [],
     closed: [],
@@ -423,7 +423,7 @@ export function IdeaWorkspace({
       // Preserve any optimistically updated ideas
       const newState = {
         suggested: results.suggested,
-        'deep-dive': results.deep_dive,
+        deep_dive: results.deep_dive,
         iterating: results.iterating,
         considering: results.considering,
         closed: results.closed,
@@ -718,7 +718,7 @@ export function IdeaWorkspace({
   // Add state for Kanban ideas by stage
   const [kanbanIdeasByStage, setKanbanIdeasByStage] = useState<Record<Stage, NormalizedIdea[]>>({
     suggested: [],
-    'deep-dive': [],
+    deep_dive: [],
     iterating: [],
     considering: [],
     closed: [],
@@ -810,7 +810,7 @@ export function IdeaWorkspace({
                   setModalIdea(null);
                 }}
                 defaultStage={(() => {
-                  if (modalIdea.status === 'deep_dive') return 'deep-dive';
+                  if (modalIdea.status === 'deep_dive') return 'deep_dive';
                   if (modalIdea.status === 'iterating') return 'iterating';
                   if (modalIdea.status === 'considering') return 'considering';
                   if (modalIdea.status === 'closed') return 'closed';

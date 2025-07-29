@@ -4,6 +4,7 @@ import { Badge } from "./ui/badge";
 import { Idea, Stage } from "@/types/idea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { GlobalActionsDropdown } from "./GlobalActionsDropDown";
+import { displayValue, getStageColor, getStageLabel, getSourceTypeLabel, cleanText } from "@/lib/utils";
 
 export interface UnifiedIdeaCardProps {
   idea: Idea;
@@ -27,50 +28,10 @@ export interface DeepDiveStage {
   };
 }
 
-
-const getSourceTypeLabel = (type?: string | null) => {
-  switch (type) {
-    case 'byoi': return 'BYOI';
-    case 'system': return 'System Generated';
-    case 'madlib': return 'AI Generated';
-    case 'not_set':
-    case undefined:
-    case null:
-      return 'Not Set';
-    default:
-      return type ? type.charAt(0).toUpperCase() + type.slice(1) : 'Not Set';
-  }
-};
-
-const displayValue = (val?: number | null) =>
-  val != null ? val : '\u2014';
-
-const getStageColor = (stage: Stage) => {
-  switch (stage) {
-    case 'suggested': return 'bg-blue-100 text-blue-700';
-    case 'deep-dive': return 'bg-purple-100 text-purple-700';
-    case 'iterating': return 'bg-orange-100 text-orange-700';
-    case 'considering': return 'bg-green-100 text-green-700';
-    case 'closed': return 'bg-gray-100 text-gray-700';
-    default: return 'bg-slate-100 text-slate-700';
-  }
-};
-
-const getStageLabel = (stage: Stage) => {
-  switch (stage) {
-    case 'suggested': return 'Suggested';
-    case 'deep-dive': return 'Deep Dive';
-    case 'iterating': return 'Iterating';
-    case 'considering': return 'Considering';
-    case 'closed': return 'Closed';
-    default: return 'Unknown';
-  }
-};
-
 const mapStatusToStage = (status: string): Stage => {
   switch (status) {
     case 'deep_dive':
-      return 'deep-dive';
+      return 'deep_dive';
     case 'iterating':
       return 'iterating';
     case 'considering':
@@ -81,8 +42,6 @@ const mapStatusToStage = (status: string): Stage => {
       return 'suggested';
   }
 };
-
-const cleanText = (text: string) => text.replace(/\.\.\.$/, '');
 
 const UnifiedIdeaCard: React.FC<UnifiedIdeaCardProps> = ({
   idea,
@@ -189,7 +148,7 @@ const UnifiedIdeaCard: React.FC<UnifiedIdeaCardProps> = ({
         )}
 
         {/* Deep Dive summary for Deep Dive stage */}
-        {currentStage === 'deep-dive' && (
+        {currentStage === 'deep_dive' && (
           idea.deep_dive && Object.keys(idea.deep_dive).length > 0 ? (
             <div className="mt-2">
               {idea.deep_dive?.overall_score !== undefined && (
@@ -226,7 +185,7 @@ const UnifiedIdeaCard: React.FC<UnifiedIdeaCardProps> = ({
           </div>
         )}
       </Card>
-      {/* Modal for viewing suggested data from deep-dive or later stages */}
+      {/* Modal for viewing suggested data from deep_dive or later stages */}
       <Dialog open={showSuggestedModal} onOpenChange={setShowSuggestedModal}>
         <DialogContent>
           <DialogHeader>

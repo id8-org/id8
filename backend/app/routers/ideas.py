@@ -900,7 +900,7 @@ async def patch_idea(
         db=db
     )
 
-@router.post("/{idea_id}/deep-dive")
+@router.post("/{idea_id}/deep_dive")
 async def generate_deep_dive_for_idea(
     idea_id: str,
     current_user: User = Depends(get_current_active_user),

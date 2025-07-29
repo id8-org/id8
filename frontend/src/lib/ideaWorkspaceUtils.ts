@@ -3,15 +3,14 @@
 
 import type { Idea as NormalizedIdea } from '../types/idea';
 import type { IdeaStatus } from '../lib/api';
+import type { Stage } from '../types/index';
 import { triggerDeepDive, triggerIterationTasks, triggerConsiderationTasks, triggerClosureTasks } from '../lib/api';
-
-export type Stage = 'suggested' | 'deep-dive' | 'iterating' | 'considering' | 'closed';
 
 // Utility to map backend status to Stage
 export function mapStatusToStage(status: string): Stage {
   switch (status) {
     case 'deep_dive':
-      return 'deep-dive';
+      return 'deep_dive';
     case 'iterating':
       return 'iterating';
     case 'considering':
@@ -26,7 +25,7 @@ export function mapStatusToStage(status: string): Stage {
 // Utility to map Stage back to backend status string
 export function mapStageToStatus(stage: Stage): IdeaStatus {
   switch (stage) {
-    case 'deep-dive':
+    case 'deep_dive':
       return 'deep_dive';
     case 'iterating':
       return 'iterating';
@@ -145,13 +144,13 @@ export function getBlankIdea(): NormalizedIdea {
 // Helper function to determine required tasks based on status transition
 export function getRequiredTasksForTransition(fromStatus: Stage, toStatus: Stage): string[] {
   const taskMap: Record<string, string[]> = {
-    'suggested->deep-dive': ['deep_dive'],
+    'suggested->deep_dive': ['deep_dive'],
     'suggested->iterating': ['deep_dive', 'iterating'],
     'suggested->considering': ['deep_dive', 'iterating', 'considering'],
     'suggested->closed': ['deep_dive', 'iterating', 'considering', 'closure'],
-    'deep-dive->iterating': ['iterating'],
-    'deep-dive->considering': ['iterating', 'considering'],
-    'deep-dive->closed': ['iterating', 'considering', 'closure'],
+    'deep_dive->iterating': ['iterating'],
+    'deep_dive->considering': ['iterating', 'considering'],
+    'deep_dive->closed': ['iterating', 'considering', 'closure'],
     'iterating->considering': ['considering'],
     'iterating->closed': ['considering', 'closure'],
     'considering->closed': ['closure']

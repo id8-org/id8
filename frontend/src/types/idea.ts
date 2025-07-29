@@ -28,10 +28,10 @@ export interface StageDetails {
   riskiestAssumptions?: string[];
   version?: string;
   favorite?: boolean;
-  marketOpportunity?: any;
-  executionCapability?: any;
-  businessViability?: any;
-  strategicAlignment?: any;
+  marketOpportunity?: DeepDiveStage['market_opportunity'];
+  executionCapability?: DeepDiveStage['execution_capability'];
+  businessViability?: DeepDiveStage['business_viability'];
+  strategicAlignment?: DeepDiveStage['strategic_alignment_risks'];
 }
 
 export interface Idea {

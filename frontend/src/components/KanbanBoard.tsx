@@ -2,19 +2,13 @@
 // Never render KanbanBoard directly in isolation.
 
 import React, { useState, useCallback } from 'react';
-import { useIdeas } from '@/hooks/useIdeas';
+import { useKanbanIdeas } from '@/hooks/useKanbanIdeas';
+import { validateIdeas, validateIdea } from '@/lib/validation';
 import { IdeaWorkspace } from './IdeaWorkspace';
 import type { Idea, Repo, IdeaStatus } from '@/lib/api';
-import { z } from 'zod';
-import { ideaSchema } from '@/types/schemas';
 
 interface KanbanBoardProps {
   openAskAI: (context: { type: 'profile' } | { type: 'idea', idea: Idea } | { type: 'version', idea: Idea, version: number }) => void;
-}
-
-// Defensive: always use safeArray() for any .length or .map on possibly undefined fields
-function safeArray<T>(val: T[] | undefined | null): T[] {
-  return Array.isArray(val) ? val : [];
 }
 
 function ErrorFallback({ error, rawData }: { error: Error; rawData?: unknown }) {
@@ -33,145 +27,81 @@ function ErrorFallback({ error, rawData }: { error: Error; rawData?: unknown }) 
 }
 
 export default function KanbanBoard({ openAskAI }: KanbanBoardProps) {
-  // Fetch ideas for each stage
-  const suggested = useIdeas('suggested');
-  const deepDive = useIdeas('deep_dive');
-  const iterating = useIdeas('iterating');
-  const considering = useIdeas('considering');
-  const closed = useIdeas('closed');
-
-  // Debug: Log the ideas fetched for each stage
-  console.log('[KANBAN DEBUG] suggested:', suggested.ideas);
-  console.log('[KANBAN DEBUG] deep_dive:', deepDive.ideas);
-  console.log('[KANBAN DEBUG] iterating:', iterating.ideas);
-  console.log('[KANBAN DEBUG] considering:', considering.ideas);
-  console.log('[KANBAN DEBUG] closed:', closed.ideas);
-
-  // Combine all ideas for validation and modal logic
-  const allIdeas = [
-    ...(suggested.ideas || []),
-    ...(deepDive.ideas || []),
-    ...(iterating.ideas || []),
-    ...(considering.ideas || []),
-    ...(closed.ideas || [])
-  ];
-
-  // Debug: Log the final ideasByStage prop
-  const ideasByStage = {
-    suggested: safeArray(suggested.ideas),
-    deep_dive: safeArray(deepDive.ideas),
-    iterating: safeArray(iterating.ideas),
-    considering: safeArray(considering.ideas),
-    closed: safeArray(closed.ideas)
-  };
-  console.log('[KANBAN DEBUG] ideasByStage:', ideasByStage);
-
-  // Add missing state for loading and error handling
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<any>(null);
-
-  // Placeholder for repos if needed; can be extended to fetch real repos
+  // Use consolidated Kanban ideas hook
+  const { ideasByStage, isLoading, error, refreshStage, allIdeas } = useKanbanIdeas();
+  
+  // Validate all ideas
+  const validation = validateIdeas(allIdeas);
+  
+  // Local state for modal and repos
   const [repos] = useState<Repo[]>([]);
   const [modalIdea, setModalIdea] = useState<Idea | null>(null);
 
-  // Defensive: Validate all ideas with Zod, fallback to [] if invalid
-  const validatedIdeas: Idea[] = [];
-  let validationError: any = null;
-  if (Array.isArray(allIdeas)) {
-    for (const idea of allIdeas) {
-      const result = ideaSchema.safeParse(idea);
-      if (result.success) {
-        validatedIdeas.push(result.data as unknown as Idea);
-      } else {
-        validationError = result.error;
-        // Optionally, log or collect errors for reporting
-      }
-    }
-  }
-
-  // Mock functions for missing properties
+  // Mock functions for missing properties - TODO: Implement proper API calls
   const createIdea = {
-    mutateAsync: async (data: any) => {
-      // TODO: Implement actual create logic
+    mutateAsync: async (data: Idea) => {
       console.log('Create idea:', data);
-      await suggested.refreshIdeas(); // Refresh the stage where the idea was created
+      await refreshStage('suggested'); // Refresh the stage where ideas are typically created
       return data;
     }
   };
 
   const deleteIdea = {
     mutateAsync: async (ideaId: string) => {
-      // TODO: Implement actual delete logic
       console.log('Delete idea:', ideaId);
-      await suggested.refreshIdeas(); // Refresh the stage where the idea was deleted
+      // TODO: Determine which stage to refresh based on the deleted idea
+      await refreshStage('suggested'); 
       return { id: ideaId };
     }
   };
 
-  // Defensive handlers
+  // Consolidated event handlers using the centralized refresh logic
   const handleIdeaDeleted = useCallback(async (ideaId: string) => {
     try {
       await deleteIdea.mutateAsync(ideaId);
     } catch (e) {
-      // Optionally show toast
+      console.error('Failed to delete idea:', e);
     }
   }, [deleteIdea]);
 
   const handleIdeaUpdated = useCallback(async (idea: Idea) => {
     try {
-      // This update logic needs to be more sophisticated to handle stage changes
-      // For now, we'll just refresh the stage the idea belongs to
-      const stage = idea.status;
-      if (stage === 'suggested') await suggested.refreshIdeas();
-      if (stage === 'deep_dive') await deepDive.refreshIdeas();
-      if (stage === 'iterating') await iterating.refreshIdeas();
-      if (stage === 'considering') await considering.refreshIdeas();
-      if (stage === 'closed') await closed.refreshIdeas();
+      await refreshStage(idea.status);
     } catch (e) {
-      // Optionally show toast
+      console.error('Failed to update idea:', e);
     }
-  }, [suggested, deepDive, iterating, considering, closed]);
+  }, [refreshStage]);
 
   const handleStatusChange = useCallback(async (ideaId: string, status: IdeaStatus) => {
     try {
-      // This update logic needs to be more sophisticated to handle stage changes
-      // For now, we'll just refresh the stage the idea belongs to
-      const stage = status;
-      if (stage === 'suggested') await suggested.refreshIdeas();
-      if (stage === 'deep_dive') await deepDive.refreshIdeas();
-      if (stage === 'iterating') await iterating.refreshIdeas();
-      if (stage === 'considering') await considering.refreshIdeas();
-      if (stage === 'closed') await closed.refreshIdeas();
+      await refreshStage(status);
     } catch (e) {
-      // Optionally show toast
+      console.error('Failed to change status:', e);
     }
-  }, [suggested, deepDive, iterating, considering, closed]);
+  }, [refreshStage]);
 
   const handleDeepDive = useCallback(async (ideaId: string) => {
     try {
-      // This deep dive logic needs to be more sophisticated to handle stage changes
-      // For now, we'll just refresh the stage the idea belongs to
-      const stage = 'deep_dive'; // Assuming deep dive moves to deep_dive stage
-      await deepDive.refreshIdeas();
+      await refreshStage('deep_dive');
     } catch (e) {
-      // Optionally show toast
+      console.error('Failed to trigger deep dive:', e);
     }
-  }, [deepDive]);
+  }, [refreshStage]);
 
-  const refreshIdeas = useCallback(() => {
-    // This refresh logic is now handled by individual stage refreshes
-  }, []);
-
+  // Error handling
   if (isLoading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
+  
   if (error) {
     return <ErrorFallback error={error} />;
   }
-  if (validationError) {
-    return <ErrorFallback error={validationError} rawData={allIdeas} />;
+  
+  if (validation.hasErrors) {
+    return <ErrorFallback error={validation.errors[0]} rawData={validation.invalidIdeas} />;
   }
-  if (!Array.isArray(validatedIdeas) || validatedIdeas.length === 0) {
+  
+  if (validation.validIdeas.length === 0) {
     // Enhanced empty state for better user experience
     return (
       <div className="flex flex-col items-center justify-center h-screen p-8 text-center">
@@ -198,25 +128,14 @@ export default function KanbanBoard({ openAskAI }: KanbanBoardProps) {
     );
   }
 
-  let safeModalIdea = null;
-  if (modalIdea) {
-    const result = ideaSchema.safeParse(modalIdea);
-    if (result.success) {
-      safeModalIdea = result.data as unknown as Idea;
-    }
-  }
+  // Validate modal idea if present
+  const safeModalIdea = modalIdea ? validateIdea(modalIdea).idea : null;
 
   try {
     return (
       <IdeaWorkspace
         ideasByStage={ideasByStage}
-        refreshStage={stage => {
-          if (stage === 'suggested') suggested.refreshIdeas();
-          if (stage === 'deep_dive') deepDive.refreshIdeas();
-          if (stage === 'iterating') iterating.refreshIdeas();
-          if (stage === 'considering') considering.refreshIdeas();
-          if (stage === 'closed') closed.refreshIdeas();
-        }}
+        refreshStage={refreshStage}
         repos={repos}
         onIdeaDeleted={handleIdeaDeleted}
         onIdeaUpdated={handleIdeaUpdated}
@@ -227,7 +146,7 @@ export default function KanbanBoard({ openAskAI }: KanbanBoardProps) {
         openAskAI={openAskAI}
       />
     );
-  } catch (e: any) {
-    return <ErrorFallback error={e} rawData={validatedIdeas} />;
+  } catch (e) {
+    return <ErrorFallback error={e instanceof Error ? e : new Error('Unknown error')} rawData={validation.validIdeas} />;
   }
 } 

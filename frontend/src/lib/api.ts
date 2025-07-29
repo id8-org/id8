@@ -159,9 +159,9 @@ export interface Idea {
   sam?: number;
   som?: number;
   // Iterating stage fields
-  iterating?: any;
+  iterating?: IteratingStage;
   // Considering stage fields
-  considering?: any;
+  considering?: ConsideringStage;
 }
 
 export interface DeepDiveSection {
@@ -306,9 +306,11 @@ export interface Config {
 }
 
 // Helper to robustly extract ideas array from API response
-function extractIdeasArray(res: any): Idea[] {
+function extractIdeasArray(res: unknown): Idea[] {
   if (Array.isArray(res)) return res;
-  if (res && Array.isArray(res.ideas)) return res.ideas;
+  if (res && typeof res === 'object' && 'ideas' in res && Array.isArray((res as any).ideas)) {
+    return (res as any).ideas;
+  }
   return [];
 }
 
@@ -407,7 +409,7 @@ export const triggerDeepDive = async (ideaId: string, user?: any): Promise<DeepD
     body.request.user_context = user_context;
   }
   // Always send a JSON object with a 'request' key
-  const response = await api.post(`/api/ideas/${ideaId}/deep-dive`, body);
+  const response = await api.post(`/api/ideas/${ideaId}/deep_dive`, body);
   return response.data;
 };
 
@@ -1290,19 +1292,19 @@ export const deleteSuggested = (id: string) =>
 
 // Deep Dive stage API
 export const createDeepDive = (data: DeepDiveCreate) =>
-  api.post<DeepDive>('/deep-dive/', data);
+  api.post<DeepDive>('/deep_dive/', data);
 
 export const getDeepDiveById = (id: string) =>
-  api.get<DeepDive>(`/deep-dive/${id}`);
+  api.get<DeepDive>(`/deep_dive/${id}`);
 
 export const getDeepDiveByIdeaId = (ideaId: string) =>
-  api.get<DeepDive>(`/deep-dive/idea/${ideaId}`);
+  api.get<DeepDive>(`/deep_dive/idea/${ideaId}`);
 
 export const updateDeepDive = (id: string, data: DeepDiveCreate) =>
-  api.put<DeepDive>(`/deep-dive/${id}`, data);
+  api.put<DeepDive>(`/deep_dive/${id}`, data);
 
 export const deleteDeepDive = (id: string) =>
-  api.delete(`/deep-dive/${id}`);
+  api.delete(`/deep_dive/${id}`);
 
 // Iterating stage API
 export const createIterating = (data: IteratingCreate) =>

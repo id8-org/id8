@@ -37,7 +37,7 @@ export interface DeepDiveCategoryNarratives {
 export interface DeepDiveCategory {
   scores?: DeepDiveCategoryScores;
   narratives?: DeepDiveCategoryNarratives;
-  details?: any[];
+  details?: string[];
 }
 
 export interface DeepDiveStage {
@@ -121,7 +121,7 @@ export interface GenerateIdeaRequest {
 }
 
 export interface GenerateIdeaResponse {
-  ideas: any[];
+  ideas: Idea[];
   message?: string;
 }
 
